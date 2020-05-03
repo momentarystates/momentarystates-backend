@@ -3,11 +3,12 @@ package persistence.dao
 import java.time.OffsetDateTime
 import java.util.UUID
 
-import commons.BaPostgresProfile.api._
 import javax.inject.{Inject, Singleton}
-import persistence.model.UserEntity
+import org.postgresql.util.PSQLException
+import persistence.model.{UserEntity, UserRole}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
+import persistence.AppPostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -19,11 +20,13 @@ final class UserDao @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     def id: Rep[UUID]             = column[UUID]("id", O.PrimaryKey)
     def username: Rep[String]     = column[String]("username")
     def passwordHash: Rep[String] = column[String]("password_hash")
+    def passwordSalt: Rep[String] = column[String]("password_salt")
+    def role: Rep[UserRole.Value] = column[UserRole.Value]("role")
     def ts: Rep[OffsetDateTime]   = column[OffsetDateTime]("ts")
     def lm: Rep[OffsetDateTime]   = column[OffsetDateTime]("lm")
     def v: Rep[Int]               = column[Int]("v")
 
-    def * = (id.?, username, passwordHash, ts, lm, v) <> ((UserEntity.apply _).tupled, UserEntity.unapply)
+    def * = (id.?, username, passwordHash, passwordSalt, role, ts, lm, v) <> ((UserEntity.apply _).tupled, UserEntity.unapply)
   }
 
   private val Users = TableQuery[UsersTable]
@@ -42,8 +45,11 @@ final class UserDao @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     db.run(Users.returning(Users.map(_.id)) += user)
       .map(Right(_))
       .recover {
-        case ex: Exception => Left(ex.getMessage)
+        case psqlex: PSQLException =>
+          Left(psqlex.getServerErrorMessage.toString)
+        case ex: Exception =>
+          ex.printStackTrace()
+          Left(ex.getMessage)
       }
   }
-
 }

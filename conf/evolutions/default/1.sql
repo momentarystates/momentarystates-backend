@@ -2,16 +2,21 @@
 
 # --- !Ups
 
+CREATE TYPE user_role AS ENUM ('User', 'Admin');
+
 CREATE TABLE users
 (
     id              UUID            NOT NULL PRIMARY KEY,
-    username        varchar(128)    NOT NULL,
-    password_hash   varchar(4000),
-    ts              TIMESTAMP       NOT NULL,
-    lm              TIMESTAMP       NOT NULL,
+    username        varchar(128)    NOT NULL UNIQUE,
+    password_hash   varchar(64)     NOT NULL,
+    password_salt   varchar(16)     NOT NULL,
+    role            user_role       NOT NULL,
+    ts              timestamptz     NOT NULL,
+    lm              timestamptz     NOT NULL,
     v               int             NOT NULL
 );
 
 # --- !Downs
 
 DROP TABLE users CASCADE;
+DROP TYPE user_role;

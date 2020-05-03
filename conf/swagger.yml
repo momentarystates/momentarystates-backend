@@ -1,0 +1,10 @@
+---
+swagger: "2.0"
+info:
+  title: "DGDG API"
+  description: |
+    ## Api specification
+consumes:
+  - application/json
+produces:
+  - application/json

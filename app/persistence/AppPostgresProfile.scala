@@ -1,22 +1,21 @@
-package commons
-
-import java.time.ZoneOffset
+package persistence
 
 import com.github.tminglei.slickpg._
+import persistence.model.UserRole
 import play.api.libs.json.{JsValue, Json}
+import slick.jdbc.JdbcType
 
-trait BaPostgresProfile
+trait AppPostgresProfile
     extends ExPostgresProfile
     with PgArraySupport
     with PgDate2Support
+    with PgEnumSupport
     with PgRangeSupport
     with PgHStoreSupport
     with PgPlayJsonSupport
     with PgSearchSupport
     with PgNetSupport
     with PgLTreeSupport {
-
-  val ZoneOffsetUTC: ZoneOffset = ZoneOffset.UTC
 
   def pgjson = "jsonb"
 
@@ -41,17 +40,8 @@ trait BaPostgresProfile
                                          (s) => utils.SimpleArrayUtils.fromString[JsValue](Json.parse)(s).orNull,
                                          (v) => utils.SimpleArrayUtils.mkString[JsValue](_.toString())(v)).to(_.toList)
 
-//    implicit val localDateColumnType = MappedColumnType.base[LocalDate, Timestamp](
-//      localDate => new Timestamp(localDate.atStartOfDay().toInstant(ZoneOffsetUTC).toEpochMilli),
-//      timestamp => timestamp.toLocalDateTime.toLocalDate
-//    )
-//
-//    implicit val offsetDateTimeColumnType = MappedColumnType.base[OffsetDateTime, Timestamp](
-//      dateTime => new Timestamp(dateTime.toInstant.toEpochMilli),
-//      timestamp => timestamp.toInstant.atOffset(ZoneOffsetUTC)
-//    )
-
+    implicit val userRoleTypeMapper = createEnumJdbcType("role", UserRole)
   }
 }
 
-object BaPostgresProfile extends BaPostgresProfile
+object AppPostgresProfile extends AppPostgresProfile

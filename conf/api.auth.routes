@@ -1,0 +1,5 @@
+
+POST    /register controllers.api.auth.RegisterUserController.register()
+
+POST    /register/anon  controllers.api.auth.RegisterUserController.registerAnon()
+

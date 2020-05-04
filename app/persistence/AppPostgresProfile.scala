@@ -3,7 +3,6 @@ package persistence
 import com.github.tminglei.slickpg._
 import persistence.model.UserRole
 import play.api.libs.json.{JsValue, Json}
-import slick.jdbc.JdbcType
 
 trait AppPostgresProfile
     extends ExPostgresProfile

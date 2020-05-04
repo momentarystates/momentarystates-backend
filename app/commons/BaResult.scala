@@ -17,6 +17,8 @@ object BaResult {
 
   def apply[A](error: BaError): BaResult[A] = BaResult(Future.successful(-\/(error)))
 
+  def apply[A](value: BaError \/ A): BaResult[A] = EitherT(Future.successful(value))
+
   def fromBoolean(value: Boolean)(error: => BaError): BaResult[_] = {
     val result =
       if (value)

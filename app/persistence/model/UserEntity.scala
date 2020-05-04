@@ -1,6 +1,6 @@
 package persistence.model
 
-import java.time.{Instant, OffsetDateTime, ZoneOffset}
+import java.time.OffsetDateTime
 import java.util.UUID
 
 import commons.AuthUtil

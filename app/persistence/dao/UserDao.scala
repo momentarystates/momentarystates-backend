@@ -5,10 +5,10 @@ import java.util.UUID
 
 import javax.inject.{Inject, Singleton}
 import org.postgresql.util.PSQLException
+import persistence.AppPostgresProfile.api._
 import persistence.model.{UserEntity, UserRole}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
-import persistence.AppPostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -45,11 +45,8 @@ final class UserDao @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     db.run(Users.returning(Users.map(_.id)) += user)
       .map(Right(_))
       .recover {
-        case psqlex: PSQLException =>
-          Left(psqlex.getServerErrorMessage.toString)
-        case ex: Exception =>
-          ex.printStackTrace()
-          Left(ex.getMessage)
+        case psqlex: PSQLException => Left(psqlex.getServerErrorMessage.toString)
+        case ex: Exception         => Left(ex.getMessage)
       }
   }
 }

@@ -1,6 +1,6 @@
 package controllers.api.auth
 
-import commons.BaResult
+import commons.{AppActions, BaResult}
 import controllers.AppErrors.DatabaseError
 import controllers.ControllerHelper
 import controllers.api.ApiProtocol.RegisterUser
@@ -17,11 +17,12 @@ import scala.concurrent.Future
 @Singleton
 class RegisterUserController @Inject()(
     cc: ControllerComponents,
+    appActions: AppActions,
     userDao: UserDao
 ) extends AbstractController(cc)
     with ControllerHelper {
 
-  def register(): EssentialAction = Action.async(parse.json) { implicit request =>
+  def register(): EssentialAction = appActions.LoggingAction.async(parse.json) { implicit request =>
     def registerUser(in: RegisterUser) = {
       val user = UserEntity.generate(in.username, in.password)
       userDao.insert(user) map {
@@ -38,7 +39,7 @@ class RegisterUserController @Inject()(
     res.runResultEmptyOk()
   }
 
-  def registerAnon(): EssentialAction = Action.async(parse.json) { implicit request =>
+  def registerAnon(): EssentialAction = appActions.LoggingAction.async(parse.json) { implicit request =>
     Future.successful(NotImplemented)
   }
 }

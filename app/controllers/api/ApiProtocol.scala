@@ -13,4 +13,13 @@ object ApiProtocol {
     implicit val jsonFormat: Format[RegisterUser] = Json.format[RegisterUser]
   }
 
+  case class LoginUser(
+      username: String,
+      password: String
+  )
+
+  object LoginUser {
+    implicit val jsonFormat: Format[LoginUser] = Json.format[LoginUser]
+  }
+
 }

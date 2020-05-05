@@ -1,10 +1,10 @@
 package controllers.api
 
-import base.WithDatabase
+import base.BaseSpec
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
-final class PlaygroundControllerSpec extends WithDatabase {
+final class PlaygroundControllerSpec extends BaseSpec {
 
   "PlaygroundController" should {
     "succeed" in withDatabase {

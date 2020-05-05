@@ -1,8 +1,8 @@
 package controllers.api.auth
 
-import commons.{AppActions, BaResult}
+import commons.BaResult
 import controllers.AppErrors.DatabaseError
-import controllers.ControllerHelper
+import controllers.{AppActions, ControllerHelper}
 import controllers.api.ApiProtocol.RegisterUser
 import javax.inject.{Inject, Singleton}
 import persistence.dao.UserDao

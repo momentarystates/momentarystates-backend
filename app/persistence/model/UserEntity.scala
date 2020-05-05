@@ -3,8 +3,7 @@ package persistence.model
 import java.time.OffsetDateTime
 import java.util.UUID
 
-import commons.AuthUtil
-import persistence.DaoDefinitions
+import commons.{AppUtils, AuthUtils}
 import play.api.libs.json.{Format, Json}
 
 case class UserEntity(
@@ -18,20 +17,20 @@ case class UserEntity(
     v: Int
 )
 
-object UserEntity extends DaoDefinitions {
+object UserEntity {
   implicit val jsonFormat: Format[UserEntity] = Json.format[UserEntity]
 
   def generate(username: String, password: String, role: UserRole.Value = UserRole.User): UserEntity = {
-    val salt = randomAlphanumeric(16)
-    val passwordHash = AuthUtil.createHash(password, salt)
+    val salt         = AppUtils.randomAlphanumeric(16)
+    val passwordHash = AuthUtils.createHash(password, salt)
     UserEntity(
       id = Option(UUID.randomUUID()),
       username = username,
       passwordHash = passwordHash,
       passwordSalt = salt,
       role = role,
-      ts = now,
-      lm = now,
+      ts = AppUtils.now,
+      lm = AppUtils.now,
       v = 0
     )
   }

@@ -2,6 +2,7 @@ package controllers
 
 import commons.{BaError, BaResult}
 import controllers.AppErrors.InvalidJsonPayloadError
+import controllers.api.ApiProtocol.User
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import play.api.mvc.{Request, Result, Results}
@@ -41,6 +42,18 @@ trait ControllerHelper {
 
     def runResultEmptyOk()(implicit request: Request[_]): Future[Result] = runInner { _ =>
       Results.Ok
+    }
+  }
+
+  implicit class RichResultWithNewSession(r: BaResult[AuthPayload]) {
+
+    import scala.concurrent.ExecutionContext.Implicits.global
+
+    def runResultWithNewSession()(implicit request: Request[_]): Future[Result] = {
+      r.run.map {
+        case -\/(err)     => ErrorResult(err)
+        case \/-(payload) => Results.Ok(Json.toJson(User.fromUserEntity(payload.user))).withSession("token" -> payload.token)
+      }
     }
   }
 }

@@ -1,5 +1,7 @@
 package commons
 
+import commons.BaResult.wrapFutureFailure
+import controllers.AppErrors
 import play.api.Logger
 import scalaz.{-\/, EitherT, \/, \/-}
 
@@ -19,7 +21,7 @@ object BaResult {
 
   def apply[A](value: BaError \/ A): BaResult[A] = EitherT(Future.successful(value))
 
-  def fromBoolean(value: Boolean)(error: => BaError): BaResult[_] = {
+  def apply(value: Boolean)(error: => BaError): BaResult[_] = {
     val result =
       if (value)
         \/-(true)
@@ -28,6 +30,16 @@ object BaResult {
 
     BaResult(Future.successful(result))
   }
+
+//  def fromBoolean(value: Boolean)(error: => BaError): BaResult[_] = {
+//    val result =
+//      if (value)
+//        \/-(true)
+//      else
+//        -\/(error)
+//
+//    BaResult(Future.successful(result))
+//  }
 
   private val wrapFutureFailure: PartialFunction[Throwable, -\/[BaError]] = {
     case exception =>

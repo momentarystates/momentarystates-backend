@@ -49,4 +49,10 @@ final class UserDao @Inject()(protected val dbConfigProvider: DatabaseConfigProv
         case ex: Exception         => Left(ex.getMessage)
       }
   }
+
+  def byUsername(username: String): Future[Option[UserEntity]] = {
+    val action = Users.filter(_.username === username).result.headOption
+    db.run(action)
+  }
+
 }

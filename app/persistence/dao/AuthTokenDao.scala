@@ -51,4 +51,9 @@ class AuthTokenDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       }
   }
 
+  def byToken(token: String): Future[Option[AuthTokenEntity]] = {
+    val action = AuthTokens.filter(_.token === token).result.headOption
+    db.run(action)
+  }
+
 }

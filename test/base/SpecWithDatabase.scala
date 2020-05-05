@@ -11,7 +11,9 @@ import play.api.test.Injecting
 import ru.yandex.qatools.embed.postgresql.EmbeddedPostgres
 import ru.yandex.qatools.embed.postgresql.distribution.Version
 
-abstract class WithDatabase extends PlaySpec with GuiceOneAppPerTest with Injecting with BeforeAndAfterAll with ScalaFutures {
+import scala.util.Random
+
+abstract class SpecWithDatabase extends PlaySpec with GuiceOneAppPerTest with Injecting with BeforeAndAfterAll with ScalaFutures {
 
   private val postgres = new EmbeddedPostgres(Version.V10_3)
 
@@ -34,4 +36,5 @@ abstract class WithDatabase extends PlaySpec with GuiceOneAppPerTest with Inject
     Evolutions.cleanupEvolutions(database)
   }
 
+  protected def rnd(num: Int): String = (Random.alphanumeric take num).mkString
 }

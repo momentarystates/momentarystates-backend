@@ -4,3 +4,7 @@ POST    /register controllers.api.auth.RegisterUserController.register()
 POST    /register/anon  controllers.api.auth.RegisterUserController.registerAnon()
 
 POST    /login controllers.api.auth.LoginUserController.login()
+
+POST    /logout controllers.api.auth.LogoutUserController.logout
+
+GET     /identity controllers.api.auth.IdentityController.identity

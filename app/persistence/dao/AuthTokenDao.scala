@@ -3,6 +3,7 @@ package persistence.dao
 import java.time.OffsetDateTime
 import java.util.UUID
 
+import commons.AppUtils
 import javax.inject.{Inject, Singleton}
 import org.postgresql.util.PSQLException
 import persistence.AppPostgresProfile.api._
@@ -13,8 +14,7 @@ import slick.jdbc.JdbcProfile
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AuthTokenDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
-    extends HasDatabaseConfigProvider[JdbcProfile] {
+class AuthTokenDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) extends HasDatabaseConfigProvider[JdbcProfile] with DaoHelper {
 
   private class AuthTokenTable(tag: Tag) extends Table[AuthTokenEntity](tag, "auth_tokens") {
     def id: Rep[UUID]                = column[UUID]("id", O.PrimaryKey)
@@ -54,6 +54,13 @@ class AuthTokenDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def byToken(token: String): Future[Option[AuthTokenEntity]] = {
     val action = AuthTokens.filter(_.token === token).result.headOption
     db.run(action)
+  }
+
+  def update(entity: AuthTokenEntity): Future[Either[String, AuthTokenEntity]] = {
+    val updatedEntity = entity.copy(lm = AppUtils.now)
+    val query         = for { authToken <- AuthTokens if authToken.id === entity.id.get } yield authToken
+    val updateAction  = query.update(updatedEntity)
+    db.run(updateAction) map { wrapUpdateInEither(entity.id, updatedEntity) }
   }
 
 }

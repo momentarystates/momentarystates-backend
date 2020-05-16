@@ -36,12 +36,29 @@ class AuthService @Inject()(
 
     val expires = authTokenExpiresAfter match {
       case "never" => None
-      case _ => Option(AppUtils.now.plusSeconds(Duration(authTokenExpiresAfter).toSeconds))
+      case _       => Option(AppUtils.now.plusSeconds(Duration(authTokenExpiresAfter).toSeconds))
     }
     val token = AuthTokenEntity.generate(user, remoteAddress, expires)
     authTokenDao.insert(token) map {
       case Left(error) => -\/(AppErrors.DatabaseError(error))
       case Right(uuid) => \/-(token.copy(id = Option(uuid)))
+    }
+  }
+
+  def invalidateAuthToken(token: String): Future[Option[String]] = {
+    authTokenDao.byToken(token) flatMap {
+      case Some(authToken) =>
+        val now = AppUtils.now
+        val updatedAuthToken = authToken.copy(
+          valid = false,
+          lm = now,
+          v = authToken.v + 1
+        )
+        authTokenDao.update(updatedAuthToken) map {
+          case Right(_)    => None
+          case Left(error) => Option(error)
+        }
+      case _ => Future(None)
     }
   }
 }

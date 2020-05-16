@@ -15,11 +15,13 @@ import scala.concurrent.{ExecutionContext, Future}
 class AppActions @Inject()(
     loggingActionBuilder: LoggingActionBuilder,
     userAwareActionBuilder: UserAwareActionBuilder,
-    anonymousActionRefiner: AnonymousActionRefiner
+    anonymousActionRefiner: AnonymousActionRefiner,
+    authenticatedActionRefiner: AuthenticatedActionRefiner
 ) {
-  def LoggingAction: ActionBuilder[Request, AnyContent]            = loggingActionBuilder
-  def UserAwareAction: ActionBuilder[UserAwareRequest, AnyContent] = LoggingAction andThen userAwareActionBuilder
-  def AnonymousAction: ActionBuilder[Request, AnyContent]          = UserAwareAction andThen anonymousActionRefiner
+  def LoggingAction: ActionBuilder[Request, AnyContent]                    = loggingActionBuilder
+  def UserAwareAction: ActionBuilder[UserAwareRequest, AnyContent]         = LoggingAction andThen userAwareActionBuilder
+  def AnonymousAction: ActionBuilder[Request, AnyContent]                  = UserAwareAction andThen anonymousActionRefiner
+  def AuthenticatedAction: ActionBuilder[AuthenticatedRequest, AnyContent] = UserAwareAction andThen authenticatedActionRefiner
 }
 
 class LoggingActionBuilder @Inject()(parser: BodyParsers.Default)(implicit ec: ExecutionContext) extends ActionBuilderImpl(parser) {
@@ -44,6 +46,8 @@ object AuthPayload {
 }
 
 class UserAwareRequest[A](request: Request[A], val authOpt: Option[AuthPayload]) extends WrappedRequest[A](request)
+
+class AuthenticatedRequest[A](request: Request[A], val auth: AuthPayload) extends WrappedRequest[A](request)
 
 class UserAwareActionBuilder @Inject()(
     val parser: BodyParsers.Default,
@@ -71,6 +75,19 @@ class AnonymousActionRefiner @Inject()(val parser: BodyParsers.Default)(implicit
     Future {
       if (request.authOpt.isDefined) Left(ErrorResult(AppErrors.AlreadyLoggedInError))
       else Right(request)
+    }
+  }
+}
+
+class AuthenticatedActionRefiner @Inject()(val parser: BodyParsers.Default)(implicit val executionContext: ExecutionContext)
+    extends ActionRefiner[UserAwareRequest, AuthenticatedRequest]
+    with ControllerHelper {
+  override def refine[A](request: UserAwareRequest[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
+    Future {
+      request.authOpt match {
+        case Some(auth) => Right(new AuthenticatedRequest(request, auth))
+        case _          => Left(Results.Unauthorized)
+      }
     }
   }
 }

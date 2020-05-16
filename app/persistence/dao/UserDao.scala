@@ -14,7 +14,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 final class UserDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
-    extends HasDatabaseConfigProvider[JdbcProfile] {
+    extends HasDatabaseConfigProvider[JdbcProfile] with DaoHelper {
 
   private class UsersTable(tag: Tag) extends Table[UserEntity](tag, "users") {
     def id: Rep[UUID]             = column[UUID]("id", O.PrimaryKey)
@@ -54,5 +54,4 @@ final class UserDao @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     val action = Users.filter(_.username === username).result.headOption
     db.run(action)
   }
-
 }

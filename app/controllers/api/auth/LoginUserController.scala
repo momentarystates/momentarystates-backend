@@ -24,7 +24,6 @@ class LoginUserController @Inject()(
     with ControllerHelper {
 
   def login(): EssentialAction = appActions.AnonymousAction.async(parse.json) { implicit request =>
-    println("-------- foobar ----------")
     val res = for {
       in    <- BaResult[LoginUser](validateJson[LoginUser](request))
       user  <- BaResult.fromFutureOption[UserEntity](userDao.byUsername(in.username))(AppErrors.EntityNotFoundError("user"))

@@ -26,7 +26,16 @@ final class LoginUserControllerSpec extends BaseSpec {
       status(response) mustBe OK
       val user = contentAsJson(response).as[User]
       user.username mustBe username
+
+      println("--------")
+      val c = cookies(response)
+      println("cookies: " + c)
+      val h = headers(response)
+      println("headers: " + h)
+      println("--------")
+
+      val foo = await(response)
+      println("--------")
     }
   }
-
 }

@@ -43,6 +43,11 @@ class EmailDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
     db.run(action)
   }
 
+  def emailsToProcess(): Future[Seq[EmailEntity]] = {
+    val action = Emails.filter(entity => { entity.retries < 3 && entity.status === EmailStatus.Unsent }).result
+    db.run(action)
+  }
+
   def insert(entity: EmailEntity): Future[Either[String, UUID]] = {
     db.run(Emails.returning(Emails.map(_.id)) += entity)
       .map(Right(_))

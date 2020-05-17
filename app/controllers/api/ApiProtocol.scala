@@ -10,7 +10,8 @@ object ApiProtocol {
 
   case class RegisterUser(
       username: String,
-      password: String
+      password: String,
+      email: String
   )
 
   object RegisterUser {

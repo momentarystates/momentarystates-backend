@@ -24,7 +24,7 @@ class RegisterUserController @Inject()(
 
   def register(): EssentialAction = appActions.LoggingAction.async(parse.json) { implicit request =>
     def registerUser(in: RegisterUser) = {
-      val user = UserEntity.generate(in.username, in.password)
+      val user = UserEntity.generate(in.username, in.password, in.email)
       userDao.insert(user) map {
         case Left(error) => -\/(DatabaseError(error))
         case Right(uuid) => \/-(user.copy(id = Option(uuid)))

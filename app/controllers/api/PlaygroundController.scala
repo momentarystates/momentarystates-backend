@@ -15,7 +15,7 @@ class PlaygroundController @Inject()(
 ) extends AbstractController(cc) {
 
   def test1(): EssentialAction = Action.async { implicit request =>
-    val user = UserEntity.generate("testname", "testHash")
+    val user = UserEntity.generate("testname", "testHash", "testname@example.com")
     userDao.insert(user) map {
       case Left(error) => BadRequest(Json.toJson(error))
       case Right(uuid) => Ok(Json.toJson(user.copy(id = Option(uuid))))

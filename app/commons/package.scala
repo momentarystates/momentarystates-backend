@@ -2,6 +2,7 @@ import controllers.AppErrors
 import scalaz.{-\/, \/-, EitherT}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.language.implicitConversions
 
 package object commons {
 

@@ -29,5 +29,4 @@ parallelExecution in Test := false
 scalacOptions in Compile ++= Seq(
   "-deprecation", // Emit warning and location for usages of deprecated APIs.
   "-feature", // Emit warning and location for usages of features that should be imported explicitly.
-  "-Ywarn-unused:imports" // Warn if an import selector is not referenced.
 )

@@ -7,7 +7,7 @@ import commons.AppUtils
 import play.api.libs.json.{Format, Json, Reads, Writes}
 
 object EmailStatus extends Enumeration {
-  val Error, New, Processing, Sent = Value
+  val Sent, Unsent = Value
 
   implicit val jsonReads: Reads[EmailStatus.Value]   = Reads.enumNameReads(EmailStatus)
   implicit val jsonWrites: Writes[EmailStatus.Value] = Writes.enumNameWrites
@@ -36,7 +36,7 @@ object EmailEntity {
       subject = subject,
       recipients = recipients,
       body = body,
-      status = EmailStatus.New,
+      status = EmailStatus.Unsent,
       messageId = None,
       retries = 0,
       ts = now,

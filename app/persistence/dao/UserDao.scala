@@ -13,20 +13,22 @@ import slick.jdbc.JdbcProfile
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-final class UserDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
-    extends HasDatabaseConfigProvider[JdbcProfile] with DaoHelper {
+final class UserDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) extends HasDatabaseConfigProvider[JdbcProfile] with DaoHelper {
 
   private class UsersTable(tag: Tag) extends Table[UserEntity](tag, "users") {
-    def id: Rep[UUID]             = column[UUID]("id", O.PrimaryKey)
-    def username: Rep[String]     = column[String]("username")
-    def passwordHash: Rep[String] = column[String]("password_hash")
-    def passwordSalt: Rep[String] = column[String]("password_salt")
-    def role: Rep[UserRole.Value] = column[UserRole.Value]("role")
-    def ts: Rep[OffsetDateTime]   = column[OffsetDateTime]("ts")
-    def lm: Rep[OffsetDateTime]   = column[OffsetDateTime]("lm")
-    def v: Rep[Int]               = column[Int]("v")
+    def id: Rep[UUID]                         = column[UUID]("id", O.PrimaryKey)
+    def username: Rep[String]                 = column[String]("username")
+    def passwordHash: Rep[String]             = column[String]("password_hash")
+    def passwordSalt: Rep[String]             = column[String]("password_salt")
+    def role: Rep[UserRole.Value]             = column[UserRole.Value]("role")
+    def email: Rep[String]                    = column[String]("email")
+    def emailConfirmedAt: Rep[OffsetDateTime] = column[OffsetDateTime]("email_confirmed_at")
+    def activationCode: Rep[String]           = column[String]("activation_code")
+    def ts: Rep[OffsetDateTime]               = column[OffsetDateTime]("ts")
+    def lm: Rep[OffsetDateTime]               = column[OffsetDateTime]("lm")
+    def v: Rep[Int]                           = column[Int]("v")
 
-    def * = (id.?, username, passwordHash, passwordSalt, role, ts, lm, v) <> ((UserEntity.apply _).tupled, UserEntity.unapply)
+    def * = (id.?, username, passwordHash, passwordSalt, role, email, emailConfirmedAt.?, activationCode, ts, lm, v) <> ((UserEntity.apply _).tupled, UserEntity.unapply)
   }
 
   private val Users = TableQuery[UsersTable]

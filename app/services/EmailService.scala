@@ -24,23 +24,11 @@ class EmailService @Inject()(
 
   def send(email: EmailEntity) = {
 
-    logger.info("--------")
-    logger.info("EmailService.send(...)")
-    logger.info("--------")
-
     val senderEmail = config.get[String]("app.email.senderEmail")
     val senderName  = config.get[String]("app.email.senderName")
 
-    def setStatusProcessing() = {
-      logger.info("setStatusProcessing()")
-      emailDao.update(email.copy(status = EmailStatus.Processing)) map {
-        case Left(error)         => -\/(AppErrors.DatabaseError(error))
-        case Right(updatedEmail) => \/-(updatedEmail)
-      }
-    }
-
     def setEmailSuccess(sentEmail: EmailEntity, messageId: String) = {
-      logger.info("setEmailSuccess()")
+      logger.info(s"email with id=${sentEmail.id.get} has been sent successfully")
       emailDao.update(email.copy(status = EmailStatus.Sent, messageId = Option(messageId))) map {
         case Left(error)         => -\/(AppErrors.DatabaseError(error))
         case Right(updatedEmail) => \/-(updatedEmail)
@@ -48,38 +36,34 @@ class EmailService @Inject()(
     }
 
     def setEmailError(sentEmail: EmailEntity, error: String): Future[BaError \/ EmailEntity] = {
-      logger.info("setEmailError(): " + error)
-      emailDao.update(email.copy(status = EmailStatus.Error)) map {
+      logger.info(s"error sending email with id=${sentEmail.id.get}. error: $error")
+      emailDao.update(sentEmail.copy(retries = sentEmail.retries + 1)) map {
         case Left(error) => -\/(AppErrors.DatabaseError(error))
         case Right(_)    => -\/(AppErrors.MailerError)
       }
     }
 
-    def sendEmail(e: EmailEntity) = {
+    def sendEmail() = {
       val from = s"$senderName<$senderEmail>"
       val em = Email(
-        subject = e.subject,
+        subject = email.subject,
         from = from,
-        to = e.recipients,
+        to = email.recipients,
         bodyText = None,
-        bodyHtml = Option(e.body)
+        bodyHtml = Option(email.body)
       )
       try {
-        logger.info("try to send an email: " + em.subject)
-        logger.info("----------------")
         val messageId = mailerClient.send(em)
-        logger.info("message id = " + messageId)
-        setEmailSuccess(e, messageId)
+        setEmailSuccess(email, messageId)
       } catch {
         case ex: Exception =>
           ex.printStackTrace()
-          setEmailError(e, ex.getMessage)
+          setEmailError(email, ex.getMessage)
       }
     }
 
     val res = for {
-      processingEmail <- BaResult[EmailEntity](setStatusProcessing())
-      sentEmail       <- BaResult[EmailEntity](sendEmail(processingEmail))
+      sentEmail <- BaResult[EmailEntity](sendEmail())
     } yield sentEmail
 
     res.run

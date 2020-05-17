@@ -2,11 +2,11 @@ package controllers.api.auth
 
 import commons.BaResult
 import controllers.AppErrors.DatabaseError
-import controllers.{AppActions, ControllerHelper}
 import controllers.api.ApiProtocol.RegisterUser
+import controllers.{AppActions, AppErrors, ControllerHelper}
 import javax.inject.{Inject, Singleton}
-import persistence.dao.UserDao
-import persistence.model.UserEntity
+import persistence.dao.{EmailDao, UserDao}
+import persistence.model.{EmailEntity, UserEntity}
 import play.api.mvc.{AbstractController, ControllerComponents, EssentialAction}
 import scalaz.Scalaz._
 import scalaz.{-\/, \/-}
@@ -18,7 +18,8 @@ import scala.concurrent.Future
 class RegisterUserController @Inject()(
     cc: ControllerComponents,
     appActions: AppActions,
-    userDao: UserDao
+    userDao: UserDao,
+    emailDao: EmailDao
 ) extends AbstractController(cc)
     with ControllerHelper {
 
@@ -31,9 +32,27 @@ class RegisterUserController @Inject()(
       }
     }
 
+    def sendEmailConfirmation(user: UserEntity) = {
+      val subject = "DGDG - user registration"
+      val body =
+        s"""
+          |Hi ${user.username},
+          |<p>You have just registered. Please confirm your email address.</p>
+          |<p>Your activation code is: ${user.activationCode}</p>
+          |<p>have fun ;-)</p>
+          |<p>your dgdg admin</p>
+          |""".stripMargin
+      val email = EmailEntity.generate(subject, List(user.email), body)
+      emailDao.insert(email) map {
+        case Left(error) => -\/(AppErrors.DatabaseError(error))
+        case Right(uuid) => \/-(email.copy(id = Option(uuid)))
+      }
+    }
+
     val res = for {
       in   <- BaResult[RegisterUser](validateJson[RegisterUser](request))
       user <- BaResult[UserEntity](registerUser(in))
+      _    <- BaResult[EmailEntity](sendEmailConfirmation(user))
     } yield user
 
     res.runResultEmptyOk()

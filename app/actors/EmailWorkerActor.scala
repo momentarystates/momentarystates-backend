@@ -72,15 +72,14 @@ class EmailWorkerActor @Inject()(
     }
 
     def processEmails(emails: Seq[EmailEntity], akku: Seq[Option[EmailEntity]]): Future[Seq[Option[EmailEntity]]] = {
-      emails match {
-        case h :: t =>
-          processSingleEmail(h) flatMap {
-            case Some(sentEmail) =>
-              Thread.sleep(1000)
-              processEmails(t, akku.+:(Option(sentEmail)))
-            case _ => processEmails(t, akku)
-          }
-        case _ => Future.successful(akku)
+      if (emails.isEmpty) Future.successful(akku)
+      else {
+        processSingleEmail(emails.head) flatMap {
+          case Some(sentEmail) =>
+            Thread.sleep(1000)
+            processEmails(emails.tail, akku.+:(Option(sentEmail)))
+          case _ => processEmails(emails.tail, akku)
+        }
       }
     }
 

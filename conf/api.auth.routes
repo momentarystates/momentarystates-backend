@@ -7,4 +7,6 @@ POST    /login controllers.api.auth.LoginUserController.login()
 
 POST    /logout controllers.api.auth.LogoutUserController.logout
 
+POST    /confirm controllers.api.auth.ConfirmEmailController.confirm
+
 GET     /identity controllers.api.auth.IdentityController.identity

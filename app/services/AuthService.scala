@@ -1,6 +1,6 @@
 package services
 
-import commons.{AppUtils, BaError, BaResult}
+import commons.{AppUtils, AppError, AppResult}
 import controllers.AppErrors
 import javax.inject.{Inject, Singleton}
 import persistence.dao.{AuthTokenDao, UserDao}
@@ -22,11 +22,11 @@ class AuthService @Inject()(
 
   private val authTokenExpiresAfter = configuration.get[String]("app.auth.tokenExpiresAfter")
 
-  def validateAuthToken(token: String): Future[BaError \/ UserEntity] = {
+  def validateAuthToken(token: String): Future[AppError \/ UserEntity] = {
 
     val res = for {
-      authToken <- BaResult.fromFutureOption[AuthTokenEntity](authTokenDao.byToken(token))(AppErrors.EntityNotFoundError("auth_token"))
-      user      <- BaResult.fromFutureOption[UserEntity](userDao.byId(authToken.userId))(AppErrors.EntityNotFoundError("user"))
+      authToken <- AppResult.fromFutureOption[AuthTokenEntity](authTokenDao.byToken(token))(AppErrors.EntityNotFoundError("auth_token"))
+      user      <- AppResult.fromFutureOption[UserEntity](userDao.byId(authToken.userId))(AppErrors.EntityNotFoundError("user"))
     } yield user
 
     res.run

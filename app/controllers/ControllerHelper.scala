@@ -1,6 +1,6 @@
 package controllers
 
-import commons.{BaError, BaResult}
+import commons.{AppError, AppResult}
 import controllers.AppErrors.InvalidJsonPayloadError
 import controllers.api.ApiProtocol.User
 import play.api.Logger
@@ -15,21 +15,21 @@ trait ControllerHelper {
 
   private val logger = Logger(classOf[ControllerHelper])
 
-  protected def validateJson[A](request: Request[JsValue])(implicit reads: Reads[A]): BaError \/ A = {
+  protected def validateJson[A](request: Request[JsValue])(implicit reads: Reads[A]): AppError \/ A = {
     request.body
       .validate[A]
       .fold(_ => -\/(InvalidJsonPayloadError), a => \/-(a))
   }
 
-  def ErrorResult(err: BaError, status: Results.Status = Results.BadRequest): Result = {
+  def ErrorResult(err: AppError, status: Results.Status = Results.BadRequest): Result = {
     val json = Json.toJson(err)
     logger.error(" error: " + json)
     status(json)
   }
 
-  implicit class RichBaResult[A: Writes](r: BaResult[A]) {
+  implicit class RichBaResult[A: Writes](r: AppResult[A]) {
 
-    private def handleError(err: BaError)(implicit request: Request[_]): Result = ErrorResult(err)
+    private def handleError(err: AppError)(implicit request: Request[_]): Result = ErrorResult(err)
 
     private def runInner(f: A => Result)(implicit request: Request[_]): Future[Result] = r.run.map {
       case -\/(err)     => handleError(err)
@@ -45,7 +45,7 @@ trait ControllerHelper {
     }
   }
 
-  implicit class RichResultWithNewSession(r: BaResult[AuthPayload]) {
+  implicit class RichResultWithNewSession(r: AppResult[AuthPayload]) {
 
     import scala.concurrent.ExecutionContext.Implicits.global
 

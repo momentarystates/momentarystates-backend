@@ -1,6 +1,6 @@
 package controllers.api.auth
 
-import commons.{AuthUtils, BaResult}
+import commons.{AuthUtils, AppResult}
 import controllers.api.ApiProtocol.LoginUser
 import controllers.{AppActions, AppErrors, AuthPayload, ControllerHelper}
 import javax.inject.{Inject, Singleton}
@@ -25,10 +25,10 @@ class LoginUserController @Inject()(
 
   def login(): EssentialAction = appActions.AnonymousAction.async(parse.json) { implicit request =>
     val res = for {
-      in    <- BaResult[LoginUser](validateJson[LoginUser](request))
-      user  <- BaResult.fromFutureOption[UserEntity](userDao.byUsername(in.username))(AppErrors.EntityNotFoundError("user"))
-      _     <- BaResult(AuthUtils.checkHash(in.password, user.passwordSalt, user.passwordHash))(AppErrors.AuthenticationFailed)
-      token <- BaResult[AuthTokenEntity](authService.createAuthToken(user, request.remoteAddress))
+      in    <- AppResult[LoginUser](validateJson[LoginUser](request))
+      user  <- AppResult.fromFutureOption[UserEntity](userDao.byUsername(in.username))(AppErrors.EntityNotFoundError("user"))
+      _     <- AppResult(AuthUtils.checkHash(in.password, user.passwordSalt, user.passwordHash))(AppErrors.AuthenticationFailed)
+      token <- AppResult[AuthTokenEntity](authService.createAuthToken(user, request.remoteAddress))
     } yield AuthPayload(user, token.token)
 
     res.runResultWithNewSession

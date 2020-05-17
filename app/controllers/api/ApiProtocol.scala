@@ -27,9 +27,20 @@ object ApiProtocol {
     implicit val jsonFormat: Format[LoginUser] = Json.format[LoginUser]
   }
 
+  case class ConfirmEmail(
+      email: String,
+      code: String
+  )
+
+  object ConfirmEmail {
+    implicit val jsonFormat: Format[ConfirmEmail] = Json.format[ConfirmEmail]
+  }
+
   case class User(
       id: UUID,
       username: String,
+      email: String,
+      confirmed: Boolean,
       role: UserRole.Value,
       ts: OffsetDateTime,
       lm: OffsetDateTime,
@@ -42,6 +53,8 @@ object ApiProtocol {
     def fromUserEntity(entity: UserEntity): User = User(
       id = entity.id.get,
       username = entity.username,
+      email = entity.email,
+      confirmed = entity.emailConfirmedAt.isDefined,
       role = entity.role,
       ts = entity.ts,
       lm = entity.lm,

@@ -3,6 +3,7 @@ package persistence.dao
 import java.time.OffsetDateTime
 import java.util.UUID
 
+import commons.AppUtils
 import javax.inject.{Inject, Singleton}
 import org.postgresql.util.PSQLException
 import persistence.AppPostgresProfile.api._
@@ -56,4 +57,17 @@ final class UserDao @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     val action = Users.filter(_.username === username).result.headOption
     db.run(action)
   }
+
+  def byEmail(email: String): Future[Option[UserEntity]] = {
+    val action = Users.filter(_.email === email).result.headOption
+    db.run(action)
+  }
+
+  def update(entity: UserEntity): Future[Either[String, UserEntity]] = {
+    val updatedEntity = entity.copy(lm = AppUtils.now, v = entity.v + 1)
+    val query         = for { user <- Users if user.id === entity.id.get } yield user
+    val updateAction  = query.update(updatedEntity)
+    db.run(updateAction) map { wrapUpdateInEither(entity.id, updatedEntity) }
+  }
+
 }

@@ -35,7 +35,7 @@ class EmailService @Inject()(
       }
     }
 
-    def setEmailError(sentEmail: EmailEntity, error: String): Future[BaError \/ EmailEntity] = {
+    def setEmailError(sentEmail: EmailEntity, error: String): Future[AppError \/ EmailEntity] = {
       logger.info(s"error sending email with id=${sentEmail.id.get}. error: $error")
       emailDao.update(sentEmail.copy(retries = sentEmail.retries + 1)) map {
         case Left(error) => -\/(AppErrors.DatabaseError(error))
@@ -63,7 +63,7 @@ class EmailService @Inject()(
     }
 
     val res = for {
-      sentEmail <- BaResult[EmailEntity](sendEmail())
+      sentEmail <- AppResult[EmailEntity](sendEmail())
     } yield sentEmail
 
     res.run

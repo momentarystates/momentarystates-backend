@@ -1,7 +1,7 @@
 package actors
 
 import akka.actor.{Actor, ActorLogging}
-import commons.BaResult
+import commons.AppResult
 import controllers.AppErrors
 import javax.inject.{Inject, Singleton}
 import persistence.dao.{AppParamDao, EmailDao}
@@ -84,10 +84,10 @@ class EmailWorkerActor @Inject()(
     }
 
     val res = for {
-      updatedParam <- BaResult[AppParamEntity](setEmailWorkerStatus(workerStatus, busy = true))
-      emails       <- BaResult.fromFuture[Seq[EmailEntity]](fetchEmails())
-      processed    <- BaResult.fromFuture[Seq[Option[EmailEntity]]](processEmails(emails, Nil))
-      _            <- BaResult[AppParamEntity](setEmailWorkerStatus(updatedParam, busy = false))
+      updatedParam <- AppResult[AppParamEntity](setEmailWorkerStatus(workerStatus, busy = true))
+      emails       <- AppResult.fromFuture[Seq[EmailEntity]](fetchEmails())
+      processed    <- AppResult.fromFuture[Seq[Option[EmailEntity]]](processEmails(emails, Nil))
+      _            <- AppResult[AppParamEntity](setEmailWorkerStatus(updatedParam, busy = false))
     } yield (emails, processed)
 
     res.run.map {

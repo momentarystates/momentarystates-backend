@@ -1,6 +1,6 @@
 package controllers.api.auth
 
-import commons.BaResult
+import commons.AppResult
 import controllers.AppErrors.DatabaseError
 import controllers.api.ApiProtocol.RegisterUser
 import controllers.{AppActions, AppErrors, ControllerHelper}
@@ -50,9 +50,9 @@ class RegisterUserController @Inject()(
     }
 
     val res = for {
-      in   <- BaResult[RegisterUser](validateJson[RegisterUser](request))
-      user <- BaResult[UserEntity](registerUser(in))
-      _    <- BaResult[EmailEntity](sendEmailConfirmation(user))
+      in   <- AppResult[RegisterUser](validateJson[RegisterUser](request))
+      user <- AppResult[UserEntity](registerUser(in))
+      _    <- AppResult[EmailEntity](sendEmailConfirmation(user))
     } yield user
 
     res.runResultEmptyOk()

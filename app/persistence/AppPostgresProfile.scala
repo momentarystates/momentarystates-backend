@@ -1,7 +1,7 @@
 package persistence
 
 import com.github.tminglei.slickpg._
-import persistence.model.UserRole
+import persistence.model.{EmailStatus, UserRole}
 import play.api.libs.json.{JsValue, Json}
 
 trait AppPostgresProfile
@@ -40,6 +40,8 @@ trait AppPostgresProfile
                                          (v) => utils.SimpleArrayUtils.mkString[JsValue](_.toString())(v)).to(_.toList)
 
     implicit val userRoleTypeMapper = createEnumJdbcType("role", UserRole)
+
+    implicit val emailStatusTypeMapper = createEnumJdbcType("status", EmailStatus)
   }
 }
 

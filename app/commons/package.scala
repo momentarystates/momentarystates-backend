@@ -1,8 +1,17 @@
-import scalaz.EitherT
+import controllers.AppErrors
+import scalaz.{-\/, \/-, EitherT}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 package object commons {
 
   type BaResult[A] = EitherT[Future, BaError, A]
+
+  implicit def databaseResult[A](value: Future[Either[String, A]])(implicit ec: ExecutionContext): BaResult[A] = {
+    val res = value map {
+      case Left(error) => -\/(AppErrors.DatabaseError(error))
+      case Right(v)    => \/-(v)
+    }
+    EitherT(res)
+  }
 }

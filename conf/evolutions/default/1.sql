@@ -27,10 +27,29 @@ CREATE TABLE auth_tokens
     ts              timestamptz     NOT NULL,
     lm              timestamptz     NOT NULL,
     v               int             NOT NULL
-)
+);
+
+CREATE TYPE email_status AS ENUM ('Error', 'New', 'Processing', 'Sent');
+
+CREATE TABLE emails
+(
+    id              UUID            NOT NULL PRIMARY KEY,
+    subject         varchar(256)    NOT NULL,
+    recipients      varchar ARRAY   NOT NULL,
+    body            varchar         NOT NULL,
+    status          email_status    NOT NULL,
+    message_id      varchar(64),
+    retries         int             NOT NULL,
+    ts              timestamptz     NOT NULL,
+    lm              timestamptz     NOT NULL,
+    v               int             NOT NULL
+);
+
 
 # --- !Downs
 
 DROP TABLE users CASCADE;
 DROP TYPE user_role;
 DROP TABLE auth_tokens CASCADE;
+DROP TYPE email_status;
+DROP TABLE emails CASCADE;

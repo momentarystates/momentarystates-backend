@@ -6,8 +6,10 @@
 ### NoDocs ###
 GET     /                           controllers.HomeController.index
 
-->      /api                        api.Routes
+### NoDocs ###
+GET     /exp/:num                   controllers.PlaygroundController.exp(num: Int)
 
+->      /api                        api.Routes
 
 ### NoDocs ###
 GET     /docs/swagger-ui/*file      controllers.Assets.at(path:String="/public/lib/swagger-ui", file:String)

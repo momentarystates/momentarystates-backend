@@ -2,8 +2,8 @@ package commons
 
 import play.api.libs.json.{Format, Json}
 
-case class BaError(error: String) {
-  def error(error: String): BaError = BaError(error)
+case class BaError(code: String, error: String) {
+  def error(error: String): BaError = BaError(code, error)
 }
 
 object  BaError {

@@ -1,6 +1,5 @@
 package commons
 
-import commons.BaResult.wrapFutureFailure
 import controllers.AppErrors
 import play.api.Logger
 import scalaz.{-\/, EitherT, \/, \/-}
@@ -21,6 +20,22 @@ object BaResult {
 
   def apply[A](value: BaError \/ A): BaResult[A] = EitherT(Future.successful(value))
 
+//  def apply[A](value: FutureEither[A])(implicit ec: ExecutionContext): BaResult[A] = {
+//    val res = value map {
+//      case Left(error) => -\/(error)
+//      case Right(v) => \/-(v)
+//    }
+//    EitherT(res)
+//  }
+//
+//  def apply[A](value: DatabaseResult[A])(implicit ec: ExecutionContext): BaResult[A] = {
+//    val res = value map {
+//      case Left(error) => -\/(AppErrors.DatabaseError(error))
+//      case Right(v) => \/-(v)
+//    }
+//    EitherT(res)
+//  }
+//
   def apply(value: Boolean)(error: => BaError): BaResult[_] = {
     val result =
       if (value)
@@ -31,20 +46,10 @@ object BaResult {
     BaResult(Future.successful(result))
   }
 
-//  def fromBoolean(value: Boolean)(error: => BaError): BaResult[_] = {
-//    val result =
-//      if (value)
-//        \/-(true)
-//      else
-//        -\/(error)
-//
-//    BaResult(Future.successful(result))
-//  }
-
   private val wrapFutureFailure: PartialFunction[Throwable, -\/[BaError]] = {
     case exception =>
       logger.error("There was an error converting the future to BeResult", exception)
-      -\/(BaError(s"Something went wrong. ${exception.getMessage}"))
+      -\/(BaError("app:0", s"Something went wrong. ${exception.getMessage}"))
   }
 
   def fromOption[A](maybeA: Option[A])(error: => BaError)(implicit ec: ExecutionContext): BaResult[A] = {

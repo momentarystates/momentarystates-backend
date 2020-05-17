@@ -57,7 +57,7 @@ class AuthTokenDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   }
 
   def update(entity: AuthTokenEntity): Future[Either[String, AuthTokenEntity]] = {
-    val updatedEntity = entity.copy(lm = AppUtils.now)
+    val updatedEntity = entity.copy(lm = AppUtils.now, v = entity.v + 1)
     val query         = for { authToken <- AuthTokens if authToken.id === entity.id.get } yield authToken
     val updateAction  = query.update(updatedEntity)
     db.run(updateAction) map { wrapUpdateInEither(entity.id, updatedEntity) }

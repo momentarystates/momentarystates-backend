@@ -31,7 +31,7 @@ class ConfirmEmailController @Inject()(
       in          <- AppResult[ConfirmEmail](validateJson[ConfirmEmail](request))
       user        <- userDao.byEmail(in.email).handleEntityNotFound("user")
       _           <- AppResult(checkUser(user))(AppErrors.InvalidUserError)
-      _           <- AppResult(user.activationCode == in.code)(AppErrors.InvalidActivationCode)
+      _           <- AppResult(user.confirmationCode == in.code)(AppErrors.InvalidActivationCode)
       updatedUser <- userDao.update(user.copy(emailConfirmedAt = Option(AppUtils.now))).toAppResult()
     } yield User.fromUserEntity(updatedUser)
 

@@ -38,7 +38,7 @@ class RegisterUserController @Inject()(
         s"""
           |Hi ${user.username},
           |<p>You have just registered. Please confirm your email address.</p>
-          |<p>Your activation code is: ${user.activationCode}</p>
+          |<p>Your code is: ${user.confirmationCode}</p>
           |<p>have fun ;-)</p>
           |<p>your dgdg admin</p>
           |""".stripMargin

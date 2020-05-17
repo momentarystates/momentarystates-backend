@@ -16,7 +16,7 @@ case class UserEntity(
     role: UserRole.Value,
     email: String,
     emailConfirmedAt: Option[OffsetDateTime],
-    activationCode: String,
+    confirmationCode: String,
     ts: OffsetDateTime,
     lm: OffsetDateTime,
     v: Int
@@ -28,7 +28,6 @@ object UserEntity {
   def generate(username: String, password: String, email: String, role: UserRole.Value = UserRole.User): UserEntity = {
     val salt         = AppUtils.randomAlphanumeric(16)
     val passwordHash = AuthUtils.createHash(password, salt)
-    val activationCode = (Random.alphanumeric take 5).mkString
     UserEntity(
       id = Option(UUID.randomUUID()),
       username = username,
@@ -37,7 +36,7 @@ object UserEntity {
       role = role,
       email = email,
       emailConfirmedAt = None,
-      activationCode = activationCode,
+      confirmationCode = AppUtils.otp,
       ts = AppUtils.now,
       lm = AppUtils.now,
       v = 0

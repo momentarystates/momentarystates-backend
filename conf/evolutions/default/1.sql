@@ -13,7 +13,7 @@ CREATE TABLE users
     role                user_role       NOT NULL,
     email               varchar(320)    NOT NULL UNIQUE,
     email_confirmed_at  timestamptz,
-    activation_code     varchar(5)      NOT NULL,
+    confirmation_code   varchar(6)      NOT NULL,
     ts                  timestamptz     NOT NULL,
     lm                  timestamptz     NOT NULL,
     v                   int             NOT NULL

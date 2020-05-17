@@ -24,12 +24,12 @@ final class UserDao @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     def role: Rep[UserRole.Value]             = column[UserRole.Value]("role")
     def email: Rep[String]                    = column[String]("email")
     def emailConfirmedAt: Rep[OffsetDateTime] = column[OffsetDateTime]("email_confirmed_at")
-    def activationCode: Rep[String]           = column[String]("activation_code")
+    def confirmationCode: Rep[String]         = column[String]("confirmation_code")
     def ts: Rep[OffsetDateTime]               = column[OffsetDateTime]("ts")
     def lm: Rep[OffsetDateTime]               = column[OffsetDateTime]("lm")
     def v: Rep[Int]                           = column[Int]("v")
 
-    def * = (id.?, username, passwordHash, passwordSalt, role, email, emailConfirmedAt.?, activationCode, ts, lm, v) <> ((UserEntity.apply _).tupled, UserEntity.unapply)
+    def * = (id.?, username, passwordHash, passwordSalt, role, email, emailConfirmedAt.?, confirmationCode, ts, lm, v) <> ((UserEntity.apply _).tupled, UserEntity.unapply)
   }
 
   private val Users = TableQuery[UsersTable]

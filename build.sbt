@@ -18,6 +18,9 @@ libraryDependencies += "com.github.tminglei"     %% "slick-pg_play-json"        
 libraryDependencies += "org.webjars"             % "swagger-ui"                  % "2.2.0"
 libraryDependencies += "com.typesafe.play"       %% "play-mailer"                % "8.0.0"
 libraryDependencies += "com.typesafe.play"       %% "play-mailer-guice"          % "8.0.0"
+libraryDependencies += "com.lightbend.akka"      %% "akka-stream-alpakka-s3"     % "2.0.0"
+libraryDependencies += "org.apache.tika"         % "tika-parsers"                % "1.24.1"
+libraryDependencies += "org.apache.pdfbox"       % "jbig2-imageio"               % "3.0.3"
 libraryDependencies += "ru.yandex.qatools.embed" % "postgresql-embedded"         % "2.9" % Test exclude ("de.flapdoodle.embed", "de.flapdoodle.embed.process")
 libraryDependencies += "de.flapdoodle.embed"     % "de.flapdoodle.embed.process" % "2.0.5"
 libraryDependencies += "org.scalatestplus.play"  %% "scalatestplus-play"         % "5.0.0" % Test
@@ -26,7 +29,9 @@ javaOptions in Test ++= Seq("-Dconfig.resource=test.conf")
 fork in Test := true
 parallelExecution in Test := false
 
+swaggerDomainNameSpaces := Seq("controllers.api", "persistence.model")
+
 scalacOptions in Compile ++= Seq(
   "-deprecation", // Emit warning and location for usages of deprecated APIs.
-  "-feature", // Emit warning and location for usages of features that should be imported explicitly.
+  "-feature" // Emit warning and location for usages of features that should be imported explicitly.
 )

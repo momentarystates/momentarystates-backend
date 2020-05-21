@@ -1,0 +1,4 @@
+
+POST    /setup/:token controllers.api.admin.AdminSetupController.setup(token: String)
+
+GET     /user/:userId controllers.api.admin.AdminUserController.get(userId: java.util.UUID)

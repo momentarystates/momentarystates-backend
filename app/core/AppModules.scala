@@ -3,6 +3,8 @@ package core
 import actors.EmailWorkerActor
 import com.google.inject.AbstractModule
 import play.api.libs.concurrent.AkkaGuiceSupport
+import services.S3Service
+import services.impl.AlpakkaS3Service
 
 class AppModules extends AbstractModule with AkkaGuiceSupport {
 
@@ -13,5 +15,8 @@ class AppModules extends AbstractModule with AkkaGuiceSupport {
 
     // actors
     bindActor[EmailWorkerActor](name = "email-worker-actor")
+
+    // services
+    bind(classOf[S3Service]).to(classOf[AlpakkaS3Service])
   }
 }

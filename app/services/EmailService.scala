@@ -45,15 +45,16 @@ class EmailService @Inject()(
 
     def sendEmail() = {
       val from = s"$senderName<$senderEmail>"
+      val to = email.recipients.filter(!_.endsWith("@example.com"))
       val em = Email(
         subject = email.subject,
         from = from,
-        to = email.recipients,
+        to = to,
         bodyText = None,
         bodyHtml = Option(email.body)
       )
       try {
-        val messageId = mailerClient.send(em)
+        val messageId = if (to.isEmpty) "" else mailerClient.send(em)
         setEmailSuccess(email, messageId)
       } catch {
         case ex: Exception =>

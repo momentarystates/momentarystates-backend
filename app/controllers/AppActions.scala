@@ -3,7 +3,7 @@ package controllers
 import java.util.Date
 
 import com.google.inject.Inject
-import persistence.model.UserEntity
+import persistence.model.{UserEntity, UserRole}
 import play.api.Logger
 import play.api.libs.json.{Format, Json}
 import play.api.mvc._
@@ -18,10 +18,22 @@ class AppActions @Inject()(
     anonymousActionRefiner: AnonymousActionRefiner,
     authenticatedActionRefiner: AuthenticatedActionRefiner
 ) {
-  def LoggingAction: ActionBuilder[Request, AnyContent]                    = loggingActionBuilder
-  def UserAwareAction: ActionBuilder[UserAwareRequest, AnyContent]         = LoggingAction andThen userAwareActionBuilder
-  def AnonymousAction: ActionBuilder[Request, AnyContent]                  = UserAwareAction andThen anonymousActionRefiner
+  def LoggingAction: ActionBuilder[Request, AnyContent] = loggingActionBuilder
+
+  def UserAwareAction: ActionBuilder[UserAwareRequest, AnyContent] = LoggingAction andThen userAwareActionBuilder
+
+  def AnonymousAction: ActionBuilder[Request, AnyContent] = UserAwareAction andThen anonymousActionRefiner
+
   def AuthenticatedAction: ActionBuilder[AuthenticatedRequest, AnyContent] = UserAwareAction andThen authenticatedActionRefiner
+
+  def AdminAction()(implicit ec: ExecutionContext): ActionBuilder[AuthenticatedRequest, AnyContent] = {
+    AuthenticatedAction andThen new ActionFilter[AuthenticatedRequest] {
+      override def executionContext: ExecutionContext = ec
+      override def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] = Future {
+        if (request.auth.user.role == UserRole.Admin) None else Option(Results.Forbidden)
+      }
+    }
+  }
 }
 
 class LoggingActionBuilder @Inject()(parser: BodyParsers.Default)(implicit ec: ExecutionContext) extends ActionBuilderImpl(parser) {

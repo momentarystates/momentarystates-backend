@@ -1,0 +1,9 @@
+---
+- type: java\.time\.OffsetDateTime
+  specAsParameter:
+    - type: string
+      format: date
+- type: java\.util\.UUID
+  specAsParameter:
+    - type: string
+      format: uuid

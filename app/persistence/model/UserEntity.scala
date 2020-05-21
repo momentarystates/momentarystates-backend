@@ -6,8 +6,6 @@ import java.util.UUID
 import commons.{AppUtils, AuthUtils}
 import play.api.libs.json.{Format, Json}
 
-import scala.util.Random
-
 case class UserEntity(
     id: Option[UUID],
     username: String,
@@ -17,6 +15,7 @@ case class UserEntity(
     email: String,
     emailConfirmedAt: Option[OffsetDateTime],
     confirmationCode: String,
+    avatar: Option[UUID],
     ts: OffsetDateTime,
     lm: OffsetDateTime,
     v: Int
@@ -37,6 +36,7 @@ object UserEntity {
       email = email,
       emailConfirmedAt = None,
       confirmationCode = AppUtils.otp,
+      avatar = None,
       ts = AppUtils.now,
       lm = AppUtils.now,
       v = 0

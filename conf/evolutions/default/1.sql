@@ -14,6 +14,7 @@ CREATE TABLE users
     email               varchar(320)    NOT NULL UNIQUE,
     email_confirmed_at  timestamptz,
     confirmation_code   varchar(6)      NOT NULL,
+    avatar              UUID,
     ts                  timestamptz     NOT NULL,
     lm                  timestamptz     NOT NULL,
     v                   int             NOT NULL
@@ -68,6 +69,19 @@ BEGIN
 END;;
 $$ LANGUAGE plpgsql;
 
+CREATE TABLE binaries
+(
+    id                  UUID            NOT NULL PRIMARY KEY,
+    file_name           varchar(256)    NOT NULL,
+    path                varchar(256)    NOT NULL,
+    content_type        varchar(64)     NOT NULL,
+    length              bigint          NOT NULL,
+    md5                 varchar(32)     NOT NULL,
+    ts                  timestamptz     NOT NULL,
+    lm                  timestamptz     NOT NULL,
+    v                   int             NOT NULL
+)
+
 
 # --- !Downs
 
@@ -77,3 +91,4 @@ DROP TABLE auth_tokens CASCADE;
 DROP TABLE emails CASCADE;
 DROP TYPE email_status;
 DROP TABLE app_params CASCADE;
+DROP TABLE binaries CASCADE;

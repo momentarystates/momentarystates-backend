@@ -6,13 +6,10 @@
 ### NoDocs ###
 GET     /                           controllers.HomeController.index
 
-### NoDocs ###
-GET     /exp/:num                   controllers.PlaygroundController.exp(num: Int)
-
 ->      /api                        api.Routes
 
 ### NoDocs ###
-GET     /docs/swagger-ui/*file      controllers.Assets.at(path:String="/public/lib/swagger-ui", file:String)
+GET     /docs/swagger-ui/*file      controllers.Assets.at(path:String="/public/lib/swagger-ui", file: String)
 
 # Map static resources from the /public folder to the /assets URL path
 ### NoDocs ###

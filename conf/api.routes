@@ -1,7 +1,8 @@
 # api routes
 
 -> /auth        api.auth.Routes
+-> /admin       api.admin.Routes
+-> /user        api.user.Routes
 
-
-
-GET /playground/1 controllers.api.PlaygroundController.test1()
+### NoDocs ###
+GET /exp/:num controllers.api.PlaygroundController.exp(num: Int)

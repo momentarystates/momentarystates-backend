@@ -10,7 +10,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents, EssentialAction, Result}
 import play.api.{Configuration, Logger}
 import scalaz.{-\/, \/-}
-import services.{AlpakkaS3PlaygroundService, EmailService}
+import services.EmailService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -22,8 +22,7 @@ class PlaygroundController @Inject()(
     emailDao: EmailDao,
     emailService: EmailService,
     config: Configuration,
-    materializer: Materializer,
-    alpakkaS3PlaygroundService: AlpakkaS3PlaygroundService
+    materializer: Materializer
 ) extends AbstractController(cc) {
 
   private val logger = Logger(classOf[PlaygroundController])
@@ -33,8 +32,6 @@ class PlaygroundController @Inject()(
       case 1 => exp1
       case 2 => exp2
       case 3 => exp3
-      case 4 => exp4
-      case 5 => exp5
       case _ => Future.successful(BadRequest("unknown exp number: " + num))
     }
   }
@@ -80,17 +77,4 @@ class PlaygroundController @Inject()(
         Future.successful(BadRequest(e.getMessage))
     }
   }
-
-  private def exp4: Future[Result] = {
-    alpakkaS3PlaygroundService.makeBucket("test-bucket-123456") map { res =>
-      Ok(res)
-    }
-  }
-
-  private def exp5: Future[Result] = {
-    alpakkaS3PlaygroundService.makeBucket2("test-bucket-123456") map { res =>
-      Ok(res)
-    }
-  }
-
 }

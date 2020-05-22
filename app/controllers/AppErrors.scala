@@ -13,6 +13,7 @@ object AppErrors {
   val MaxFileSizeError: AppError                  = AppError("app:4", "max file size exceeded")
   val NoFileSpecifiedError: AppError              = AppError("app:5", "no file specified")
   val TooManyFilesSpecifiedError: AppError        = AppError("app:6", "too many files specified")
+  val NotFoundError: AppError                     = AppError("app:7", "404 not found")
   val InvalidAdminSetupToken: AppError            = AppError("admin:1", "invalid admin setup token")
   val AlreadyLoggedInError: AppError              = AppError("auth:1", "already logged in")
   val AuthenticationFailed: AppError              = AppError("auth:2", "authentication failed")

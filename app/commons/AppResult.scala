@@ -58,4 +58,12 @@ object AppResult {
 
     AppResult(e)
   }
+
+  def fromFutureOptionError(value: Future[Option[AppError]])(implicit ec: ExecutionContext): AppResult[_] = {
+    val res = value map {
+      case Some(error) => -\/(error)
+      case _ => \/-(())
+    }
+    AppResult(res)
+  }
 }

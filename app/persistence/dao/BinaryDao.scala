@@ -51,6 +51,14 @@ class BinaryDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider
       }
   }
 
+  def delete(id: UUID): Future[Option[String]] = {
+    val action = Binaries.filter(_.id === id).delete
+    db.run(action) map {
+      case 1 => None
+      case _ => Option("error deleting binary")
+    }
+  }
+
   def update(entity: BinaryEntity): Future[Either[String, BinaryEntity]] = {
     val updatedEntity = entity.copy(lm = AppUtils.now, v = entity.v + 1)
     val query         = for { binary <- Binaries if binary.id === entity.id.get } yield binary

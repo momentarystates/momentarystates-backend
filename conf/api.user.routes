@@ -1,2 +1,4 @@
 
 POST /avatar controllers.api.user.UserAvatarController.setAvatar()
+
+GET /:id/avatar controllers.api.user.UserAvatarController.getAvatar(id: java.util.UUID)

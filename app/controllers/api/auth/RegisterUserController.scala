@@ -57,8 +57,4 @@ class RegisterUserController @Inject()(
 
     res.runResultEmptyOk()
   }
-
-  def registerAnon(): EssentialAction = appActions.LoggingAction.async(parse.json) { implicit request =>
-    Future.successful(NotImplemented)
-  }
 }

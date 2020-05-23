@@ -1,4 +1,26 @@
 
 POST /avatar controllers.api.user.UserAvatarController.setAvatar()
 
+###
+# summary: Get user avatar
+# description: |
+#   Get the avatar of a user by id
+# operationId: user-get-avatar
+# parameters:
+#   - name: id
+#     in: path
+#     description: id of the user
+#     required: true
+#     type: uuid
+# responses:
+#   200:
+#     description: Image data if the user has an avatar specified
+#   404: If user does not have an avatar defined.
+#   400:
+#     description: |
+#       bad request contains an error code and error message
+#     schema:
+#       type: object
+#       $ref: '#/definitions/commons.AppError'
+###
 GET /:id/avatar controllers.api.user.UserAvatarController.getAvatar(id: java.util.UUID)

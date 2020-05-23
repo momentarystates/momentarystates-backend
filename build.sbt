@@ -29,7 +29,7 @@ javaOptions in Test ++= Seq("-Dconfig.resource=test.conf")
 fork in Test := true
 parallelExecution in Test := false
 
-swaggerDomainNameSpaces := Seq("controllers.api", "persistence.model")
+swaggerDomainNameSpaces := Seq("controllers.api", "persistence.model", "commons")
 
 scalacOptions in Compile ++= Seq(
   "-deprecation", // Emit warning and location for usages of deprecated APIs.

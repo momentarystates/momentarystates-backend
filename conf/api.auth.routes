@@ -1,12 +1,107 @@
 
+###
+# summary: Register a new user
+# description: |
+#   Register a new user. There is currently no need to activate the user. Nevertheless after registration an email
+#   with a confirmation code is send and should be used to confirm the email.
+#
+#   After registration the user does not get a session token but needs to login explicitly.
+# operationId: auth-register
+# parameters:
+#   - name: body
+#     in: body
+#     required: true
+#     schema:
+#       type: object
+#       $ref: '#/definitions/controllers.api.ApiProtocol.RegisterUser'
+# responses:
+#   200:
+#     description: Successful result with empty response.
+#   400:
+#     description: |
+#       Registration failed due to numerous reasons such as invalid username, invalid email,
+#       username not available and such. Please see detailed error code and error message.
+#     schema:
+#       $ref: '#/definitions/commons.AppError'
+###
 POST    /register controllers.api.auth.RegisterUserController.register()
 
-POST    /register/anon  controllers.api.auth.RegisterUserController.registerAnon()
 
+###
+# summary: Login user
+# description: |
+#   Authenticate against the backend using `username` and `password`. If successful an `AuthToken` object is
+#   created that contains a token which will be added to the http header.
+# operationId: auth-login
+# parameters:
+#   - name: body
+#     in: body
+#     required: true
+#     schema:
+#       type: object
+#       $ref: '#/definitions/controllers.api.ApiProtocol.LoginUser'
+# responses:
+#   200:
+#     description: Login to the platform.
+#     schema:
+#       $ref: '#/definitions/controllers.api.ApiProtocol.User'
+#   400:
+#     description: Authentication failed due to several reasons such as username not found or wrong password.
+#     schema:
+#       $ref: '#/definitions/commons.AppError'
+###
 POST    /login controllers.api.auth.LoginUserController.login()
 
+
+###
+# summary: Logout currently logged in user.
+# description: |
+#   Logout from the platform. The `AuthToken` will be invalidated and a new http session will be created.
+# operationId: auth-logout
+# responses:
+#   200:
+#     description: successful logout with empty response
+###
 POST    /logout controllers.api.auth.LogoutUserController.logout
 
+
+###
+# summary: Confirm user email
+# description: |
+#   Confirm users email address. After registration an email with a confirmation code is send to the users email
+#   address which needs to be specified in the request payload.
+#
+#   This endpoint can be called with an authenticated user or with no session at all.
+# operationId: auth-email-confirm
+# parameters:
+#   - name: body
+#     in: body
+#     required: true
+#     schema:
+#       type: object
+#       $ref: '#/definitions/controllers.api.ApiProtocol.ConfirmEmail'
+# responses:
+#   200:
+#     description: Successful response with empty response.
+#   400:
+#     description: |
+#       Email confirmation failed due to several reasons more specified in the error code and error
+#       message.
+#     schema:
+#       $ref: '#/definitions/commons.AppError'
+###
 POST    /confirm controllers.api.auth.ConfirmEmailController.confirm
 
+
+###
+# summary: Get identity
+# description: |
+#   Get user object if authenticated, an empty response otherwise
+# operationId: auth-identity-get
+# responses:
+#   200:
+#     description: success
+#     schema:
+#       $ref: '#/definitions/controllers.api.ApiProtocol.User'
+###
 GET     /identity controllers.api.auth.IdentityController.identity

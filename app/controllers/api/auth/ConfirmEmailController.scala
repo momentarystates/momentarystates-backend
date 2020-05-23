@@ -28,14 +28,14 @@ class ConfirmEmailController @Inject()(
     }
 
     val res = for {
-      in          <- AppResult[ConfirmEmail](validateJson[ConfirmEmail](request))
-      user        <- userDao.byEmail(in.email).handleEntityNotFound("user")
-      _           <- AppResult(checkUser(user))(AppErrors.InvalidUserError)
-      _           <- AppResult(user.confirmationCode == in.code)(AppErrors.InvalidActivationCode)
-      updatedUser <- userDao.update(user.copy(emailConfirmedAt = Option(AppUtils.now))).toAppResult()
-    } yield User.fromUserEntity(updatedUser)
+      in   <- AppResult[ConfirmEmail](validateJson[ConfirmEmail](request))
+      user <- userDao.byEmail(in.email).handleEntityNotFound("user")
+      _    <- AppResult(checkUser(user))(AppErrors.InvalidUserError)
+      _    <- AppResult(user.confirmationCode == in.code)(AppErrors.InvalidActivationCode)
+      _    <- userDao.update(user.copy(emailConfirmedAt = Option(AppUtils.now))).toAppResult()
+    } yield ""
 
-    res.runResult
+    res.runResultEmptyOk()
   }
 
 }

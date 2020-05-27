@@ -1,7 +1,16 @@
-# dgdg-backend
+# momentarystates-backend
 
+## API
+
+https://momentarystates.com/docs/swagger-ui/index.html?url=https://momentarystates.com/assets/swagger.json#/
 
 ## Development
+
+#### prerequisites
+
+- java
+- postgres
+- minio
 
 #### define `local.conf` and `test.local.conf`
 

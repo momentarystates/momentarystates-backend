@@ -45,8 +45,8 @@ final class UserDao @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     db.run(action)
   }
 
-  def insert(user: UserEntity): Future[Either[String, UUID]] = {
-    db.run(Users.returning(Users.map(_.id)) += user)
+  def insert(entity: UserEntity): Future[Either[String, UUID]] = {
+    db.run(Users.returning(Users.map(_.id)) += entity)
       .map(Right(_))
       .recover {
         case psqlex: PSQLException => Left(psqlex.getServerErrorMessage.toString)

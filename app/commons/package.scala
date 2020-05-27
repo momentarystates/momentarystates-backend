@@ -47,12 +47,4 @@ package object commons {
       EitherT(res)
     }
   }
-
-  implicit def databaseResult[A](value: Future[Either[String, A]])(implicit ec: ExecutionContext): AppResult[A] = {
-    val res = value map {
-      case Left(error) => -\/(AppErrors.DatabaseError(error))
-      case Right(v)    => \/-(v)
-    }
-    EitherT(res)
-  }
 }

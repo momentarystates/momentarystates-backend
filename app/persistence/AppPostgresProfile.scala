@@ -1,8 +1,9 @@
 package persistence
 
 import com.github.tminglei.slickpg._
-import persistence.model.{EmailStatus, UserRole}
+import persistence.model.{EmailStatus, PublicStateStatus, UserRole}
 import play.api.libs.json.{JsValue, Json}
+import slick.jdbc.JdbcType
 
 trait AppPostgresProfile
     extends ExPostgresProfile
@@ -34,14 +35,13 @@ trait AppPostgresProfile
 
     implicit val strListTypeMapper = new SimpleArrayJdbcType[String]("text").to(_.toList)
 
-    implicit val playJsonArrayTypeMapper =
-      new AdvancedArrayJdbcType[JsValue](pgjson,
-                                         (s) => utils.SimpleArrayUtils.fromString[JsValue](Json.parse)(s).orNull,
-                                         (v) => utils.SimpleArrayUtils.mkString[JsValue](_.toString())(v)).to(_.toList)
+    implicit val playJsonArrayTypeMapper = new AdvancedArrayJdbcType[JsValue](pgjson, (s) => utils.SimpleArrayUtils.fromString[JsValue](Json.parse)(s).orNull, (v) => utils.SimpleArrayUtils.mkString[JsValue](_.toString())(v)).to(_.toList)
 
-    implicit val userRoleTypeMapper = createEnumJdbcType("role", UserRole)
+    implicit val userRoleTypeMapper: JdbcType[UserRole.Value] = createEnumJdbcType("role", UserRole)
 
-    implicit val emailStatusTypeMapper = createEnumJdbcType("status", EmailStatus)
+    implicit val emailStatusTypeMapper: JdbcType[EmailStatus.Value] = createEnumJdbcType("status", EmailStatus)
+
+    implicit val publicStateStatusTypeMapper: JdbcType[PublicStateStatus.Value] = createEnumJdbcType("status", PublicStateStatus)
   }
 }
 

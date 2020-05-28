@@ -9,3 +9,5 @@ target
 /RUNNING_PID
 
 /conf/local.conf
+
+.DS_Store

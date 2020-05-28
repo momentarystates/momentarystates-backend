@@ -14,6 +14,7 @@ class AppScheduler @Inject()(
     actorSystem: ActorSystem,
     config: Configuration,
     @Named("email-worker-actor") emailWorkerActor: ActorRef,
+    @Named("game-engine-actor") gameEngineActor: ActorRef
 ) {
 
   private val logger = Logger(classOf[AppScheduler])
@@ -26,6 +27,7 @@ class AppScheduler @Inject()(
     logger.info("startup dgdg backend")
     logger.info("")
     startupEmailWorker()
+    startupGameEngineActor()
   }
 
   private def startupEmailWorker(): Unit = {
@@ -41,6 +43,17 @@ class AppScheduler @Inject()(
     } else {
       logger.info("email notification worker is disabled.")
     }
+  }
+
+  private def startupGameEngineActor(): Unit = {
+    logger.info("startup game-engine-actor")
+    val engineTickInterval = FiniteDuration(20, TimeUnit.SECONDS)
+    actorSystem.scheduler.scheduleWithFixedDelay(
+      initialDelay = engineTickInterval,
+      delay = engineTickInterval,
+      receiver = gameEngineActor,
+      message = "tick"
+    )
   }
 
   startup()

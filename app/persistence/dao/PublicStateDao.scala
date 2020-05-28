@@ -25,13 +25,14 @@ class PublicStateDao @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     def maxCitizenPerState: Rep[Int]         = column[Int]("max_citizen_per_state")
     def startedAt: Rep[OffsetDateTime]       = column[OffsetDateTime]("started_at")
     def marketUrl: Rep[String]               = column[String]("market_url")
+    def isProcessing: Rep[Boolean]           = column[Boolean]("is_processing")
     def ts: Rep[OffsetDateTime]              = column[OffsetDateTime]("ts")
     def lm: Rep[OffsetDateTime]              = column[OffsetDateTime]("lm")
     def v: Rep[Int]                          = column[Int]("v")
 
-    def * = (id.?, name, logo.?, status, minCitizenPerState, maxCitizenPerState, startedAt.?, marketUrl.?, ts, lm, v) <> ((PublicStateEntity.apply _).tupled, PublicStateEntity.unapply)
+    def * = (id.?, name, logo.?, status, minCitizenPerState, maxCitizenPerState, startedAt.?, marketUrl.?, isProcessing, ts, lm, v) <> ((PublicStateEntity.apply _).tupled, PublicStateEntity.unapply)
   }
-  
+
   private val PublicStates = TableQuery[PublicStatesTable]
 
   def byId(id: UUID): Future[Option[PublicStateEntity]] = {
@@ -41,6 +42,11 @@ class PublicStateDao @Inject()(protected val dbConfigProvider: DatabaseConfigPro
 
   def byIds(ids: Seq[UUID]): Future[Seq[PublicStateEntity]] = {
     val action = PublicStates.filter(_.id.inSet(ids)).result
+    db.run(action)
+  }
+
+  def byStatus(status: PublicStateStatus.Value): Future[Seq[PublicStateEntity]] = {
+    val action = PublicStates.filter(_.status === status).result
     db.run(action)
   }
 

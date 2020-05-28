@@ -13,6 +13,7 @@ CREATE TABLE public_states
     max_citizen_per_state   int                 NOT NULL,
     started_at              timestamptz,
     market_url              varchar(512),
+    is_processing           boolean             NOT NULL,
     ts                      timestamptz         NOT NULL,
     lm                      timestamptz         NOT NULL,
     v                       int                 NOT NULL

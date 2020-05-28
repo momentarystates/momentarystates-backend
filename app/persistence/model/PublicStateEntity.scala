@@ -15,6 +15,7 @@ case class PublicStateEntity(
     maxCitizenPerState: Int,
     startedAt: Option[OffsetDateTime],
     marketUrl: Option[String],
+    isProcessing: Boolean,
     ts: OffsetDateTime,
     lm: OffsetDateTime,
     v: Int
@@ -34,6 +35,7 @@ object PublicStateEntity {
       maxCitizenPerState = maxCitizenPerState,
       startedAt = None,
       marketUrl = None,
+      isProcessing = false,
       ts = now,
       lm = now,
       v = 0

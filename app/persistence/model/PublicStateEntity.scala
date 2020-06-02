@@ -9,6 +9,7 @@ import play.api.libs.json.{Format, Json}
 case class PublicStateEntity(
     id: Option[UUID],
     name: String,
+    gameMaster: UUID,
     logo: Option[UUID],
     status: PublicStateStatus.Value,
     minCitizenPerState: Int,
@@ -24,11 +25,12 @@ case class PublicStateEntity(
 object PublicStateEntity {
   implicit val jsonFormat: Format[PublicStateEntity] = Json.format[PublicStateEntity]
 
-  def generate(name: String, minCitizenPerState: Int = -1, maxCitizenPerState: Int = -1): PublicStateEntity = {
+  def generate(name: String, gameMaster: UUID, minCitizenPerState: Int = -1, maxCitizenPerState: Int = -1): PublicStateEntity = {
     val now = AppUtils.now
     PublicStateEntity(
       id = Option(UUID.randomUUID),
       name = name,
+      gameMaster = gameMaster,
       logo = None,
       status = PublicStateStatus.Created,
       minCitizenPerState = minCitizenPerState,

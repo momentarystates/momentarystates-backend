@@ -1,7 +1,7 @@
 package persistence
 
 import com.github.tminglei.slickpg._
-import persistence.model.{EmailStatus, PublicStateStatus, UserRole}
+import persistence.model.{EmailStatus, PublicStateStatus, SocialOrder, UserRole}
 import play.api.libs.json.{JsValue, Json}
 import slick.jdbc.JdbcType
 
@@ -35,13 +35,16 @@ trait AppPostgresProfile
 
     implicit val strListTypeMapper = new SimpleArrayJdbcType[String]("text").to(_.toList)
 
-    implicit val playJsonArrayTypeMapper = new AdvancedArrayJdbcType[JsValue](pgjson, (s) => utils.SimpleArrayUtils.fromString[JsValue](Json.parse)(s).orNull, (v) => utils.SimpleArrayUtils.mkString[JsValue](_.toString())(v)).to(_.toList)
+    implicit val playJsonArrayTypeMapper =
+      new AdvancedArrayJdbcType[JsValue](pgjson, (s) => utils.SimpleArrayUtils.fromString[JsValue](Json.parse)(s).orNull, (v) => utils.SimpleArrayUtils.mkString[JsValue](_.toString())(v)).to(_.toList)
 
     implicit val userRoleTypeMapper: JdbcType[UserRole.Value] = createEnumJdbcType("role", UserRole)
 
     implicit val emailStatusTypeMapper: JdbcType[EmailStatus.Value] = createEnumJdbcType("status", EmailStatus)
 
     implicit val publicStateStatusTypeMapper: JdbcType[PublicStateStatus.Value] = createEnumJdbcType("status", PublicStateStatus)
+
+    implicit val socialOrderTypeMapper: JdbcType[SocialOrder.Value] = createEnumJdbcType("social_order", SocialOrder)
   }
 }
 

@@ -19,6 +19,7 @@ class PublicStateDao @Inject()(protected val dbConfigProvider: DatabaseConfigPro
   private class PublicStatesTable(tag: Tag) extends Table[PublicStateEntity](tag, "public_states") {
     def id: Rep[UUID]                        = column[UUID]("id", O.PrimaryKey)
     def name: Rep[String]                    = column[String]("name")
+    def gameMaster: Rep[UUID]                = column[UUID]("game_master")
     def logo: Rep[UUID]                      = column[UUID]("logo")
     def status: Rep[PublicStateStatus.Value] = column[PublicStateStatus.Value]("status")
     def minCitizenPerState: Rep[Int]         = column[Int]("min_citizen_per_state")
@@ -30,7 +31,7 @@ class PublicStateDao @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     def lm: Rep[OffsetDateTime]              = column[OffsetDateTime]("lm")
     def v: Rep[Int]                          = column[Int]("v")
 
-    def * = (id.?, name, logo.?, status, minCitizenPerState, maxCitizenPerState, startedAt.?, marketUrl.?, isProcessing, ts, lm, v) <> ((PublicStateEntity.apply _).tupled, PublicStateEntity.unapply)
+    def * = (id.?, name, gameMaster, logo.?, status, minCitizenPerState, maxCitizenPerState, startedAt.?, marketUrl.?, isProcessing, ts, lm, v) <> ((PublicStateEntity.apply _).tupled, PublicStateEntity.unapply)
   }
 
   private val PublicStates = TableQuery[PublicStatesTable]

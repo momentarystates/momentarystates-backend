@@ -38,4 +38,13 @@ object AdminProtocol {
     }
   }
 
+  case class CreatePublicState(
+      name: String,
+      gameMasterEmail: String
+  )
+
+  object CreatePublicState {
+    implicit val jsonFormat: Format[CreatePublicState] = Json.format[CreatePublicState]
+  }
+
 }

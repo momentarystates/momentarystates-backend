@@ -14,6 +14,7 @@ object AppErrors {
   val NoFileSpecifiedError: AppError              = AppError("app:5", "no file specified")
   val TooManyFilesSpecifiedError: AppError        = AppError("app:6", "too many files specified")
   val NotFoundError: AppError                     = AppError("app:7", "404 not found")
+  val InvalidQueryStringError: AppError           = AppError("app:8", "invalid query string")
   val InvalidAdminSetupToken: AppError            = AppError("admin:1", "invalid admin setup token")
   val AlreadyLoggedInError: AppError              = AppError("auth:1", "already logged in")
   val AuthenticationFailed: AppError              = AppError("auth:2", "authentication failed")

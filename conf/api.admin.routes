@@ -1,4 +1,62 @@
 
+
+###
+# summary: Setup admin user
+# description: |
+#   When calling this endpoint, the requesting users role is set to `Admin`. The path contains a token for
+#   authentication purposes.
+# operationId: admin-setup
+# parameters:
+#   - name: token
+#     in: path
+#     required: true
+#     type: string
+# responses:
+#   200:
+#     description: Successful response with empty response.
+#   400:
+#     description: |
+#       Token is not correct or user is not authenticated.
+#     schema:
+#       $ref: '#/definitions/commons.AppError'
+###
 POST    /setup/:token controllers.api.admin.AdminSetupController.setup(token: String)
 
+
+###
+# summary: Search users
+# description: |
+#   Get users that have the search query either in their email or their username.
+# operationId: admin-user-search
+# parameters:
+#   - name: q
+#     in: query
+#     required: true
+#     type: string
+# responses:
+#   200:
+#     description: success
+#     schema:
+#       type: array
+#       $ref: '#/definitions/controllers.api.admin.AdminProtocol.AdminUser'
+###
+GET     /user/search controllers.api.admin.AdminUserController.search()
+
+
+###
+# summary: Get user by id
+# description: |
+#   Get users that have the search query either in their email or their username.
+# operationId: admin-user-search
+# parameters:
+#   - name: q
+#     in: query
+#     required: true
+#     type: string
+# responses:
+#   200:
+#     description: success
+#     schema:
+#       $ref: '#/definitions/controllers.api.admin.AdminProtocol.AdminUser'
+###
 GET     /user/:userId controllers.api.admin.AdminUserController.get(userId: java.util.UUID)

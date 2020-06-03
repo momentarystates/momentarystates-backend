@@ -64,6 +64,11 @@ final class UserDao @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     db.run(action)
   }
 
+  def search(query: String): Future[Seq[UserEntity]] = {
+    val action = Users.filter(e => (e.username like s"%$query%") || (e.email like s"%$query%")).result
+    db.run(action)
+  }
+
   def update(entity: UserEntity): Future[Either[String, UserEntity]] = {
     val updatedEntity = entity.copy(lm = AppUtils.now, v = entity.v + 1)
     val query         = for { user <- Users if user.id === entity.id.get } yield user

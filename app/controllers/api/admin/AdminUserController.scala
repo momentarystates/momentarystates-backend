@@ -4,13 +4,15 @@ import java.util.UUID
 
 import commons._
 import controllers.api.admin.AdminProtocol.AdminUser
-import controllers.{AppActions, ControllerHelper}
+import controllers.{AppActions, AppErrors, ControllerHelper}
 import javax.inject.{Inject, Singleton}
 import persistence.dao.UserDao
+import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents, EssentialAction}
 import scalaz.Scalaz._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
 class AdminUserController @Inject()(
@@ -26,5 +28,12 @@ class AdminUserController @Inject()(
     } yield AdminUser.fromUserEntity(user)
 
     res.runResult
+  }
+
+  def search(): EssentialAction = actions.AdminAction().async { implicit request =>
+    request.getQueryString("q") match {
+      case Some(query) => userDao.search(query).map(users => Ok(Json.toJson(users.map(AdminUser.fromUserEntity))))
+      case _           => Future.successful(BadRequest(Json.toJson(AppErrors.InvalidQueryStringError)))
+    }
   }
 }

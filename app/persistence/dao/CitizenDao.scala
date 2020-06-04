@@ -7,7 +7,7 @@ import commons.AppUtils
 import javax.inject.{Inject, Singleton}
 import org.postgresql.util.PSQLException
 import persistence.AppPostgresProfile.api._
-import persistence.model.CitizenEntity
+import persistence.model.{CitizenEntity, CitizenshipEndReason}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 
@@ -17,16 +17,30 @@ import scala.concurrent.{ExecutionContext, Future}
 class CitizenDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) extends HasDatabaseConfigProvider[JdbcProfile] with DaoHelper {
 
   private class CitizensTable(tag: Tag) extends Table[CitizenEntity](tag, "citizens") {
-    def id: Rep[UUID]                  = column[UUID]("id", O.PrimaryKey)
-    def userId: Rep[UUID]              = column[UUID]("user_id")
-    def privateStateId: Rep[UUID]      = column[UUID]("private_state_id")
-    def startedAt: Rep[OffsetDateTime] = column[OffsetDateTime]("started_at")
-    def endedAt: Rep[OffsetDateTime]   = column[OffsetDateTime]("ended_at")
-    def ts: Rep[OffsetDateTime]        = column[OffsetDateTime]("ts")
-    def lm: Rep[OffsetDateTime]        = column[OffsetDateTime]("lm")
-    def v: Rep[Int]                    = column[Int]("v")
+    def id: Rep[UUID]                              = column[UUID]("id", O.PrimaryKey)
+    def userId: Rep[UUID]                          = column[UUID]("user_id")
+    def privateStateId: Rep[UUID]                  = column[UUID]("private_state_id")
+    def avatar: Rep[UUID]                          = column[UUID]("avatar")
+    def startedAt: Rep[OffsetDateTime]             = column[OffsetDateTime]("started_at")
+    def endedAt: Rep[OffsetDateTime]               = column[OffsetDateTime]("ended_at")
+    def endReason: Rep[CitizenshipEndReason.Value] = column[CitizenshipEndReason.Value]("end_reason")
+    def ts: Rep[OffsetDateTime]                    = column[OffsetDateTime]("ts")
+    def lm: Rep[OffsetDateTime]                    = column[OffsetDateTime]("lm")
+    def v: Rep[Int]                                = column[Int]("v")
 
-    def * = (id.?, userId, privateStateId, startedAt, endedAt.?, ts, lm, v) <> ((CitizenEntity.apply _).tupled, CitizenEntity.unapply)
+    def * =
+      (
+        id.?,
+        userId,
+        privateStateId,
+        avatar.?,
+        startedAt,
+        endedAt.?,
+        endReason.?,
+        ts,
+        lm,
+        v
+      ) <> ((CitizenEntity.apply _).tupled, CitizenEntity.unapply)
   }
 
   private val Citizens = TableQuery[CitizensTable]

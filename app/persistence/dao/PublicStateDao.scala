@@ -7,7 +7,7 @@ import commons.AppUtils
 import javax.inject.{Inject, Singleton}
 import org.postgresql.util.PSQLException
 import persistence.AppPostgresProfile.api._
-import persistence.model.{PublicStateEntity, PublicStateStatus}
+import persistence.model.{PublicStateEntity, PublicStateParams, PublicStateStatus}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 
@@ -18,12 +18,12 @@ class PublicStateDao @Inject()(protected val dbConfigProvider: DatabaseConfigPro
 
   private class PublicStatesTable(tag: Tag) extends Table[PublicStateEntity](tag, "public_states") {
     def id: Rep[UUID]                        = column[UUID]("id", O.PrimaryKey)
+    def speculationId: Rep[UUID]             = column[UUID]("speculation_id")
     def name: Rep[String]                    = column[String]("name")
-    def gameMaster: Rep[UUID]                = column[UUID]("game_master")
     def logo: Rep[UUID]                      = column[UUID]("logo")
+    def goddess: Rep[UUID]                   = column[UUID]("goddess")
     def status: Rep[PublicStateStatus.Value] = column[PublicStateStatus.Value]("status")
-    def minCitizenPerState: Rep[Int]         = column[Int]("min_citizen_per_state")
-    def maxCitizenPerState: Rep[Int]         = column[Int]("max_citizen_per_state")
+    def params: Rep[PublicStateParams]       = column[PublicStateParams]("params")
     def startedAt: Rep[OffsetDateTime]       = column[OffsetDateTime]("started_at")
     def marketUrl: Rep[String]               = column[String]("market_url")
     def isProcessing: Rep[Boolean]           = column[Boolean]("is_processing")
@@ -31,7 +31,22 @@ class PublicStateDao @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     def lm: Rep[OffsetDateTime]              = column[OffsetDateTime]("lm")
     def v: Rep[Int]                          = column[Int]("v")
 
-    def * = (id.?, name, gameMaster, logo.?, status, minCitizenPerState, maxCitizenPerState, startedAt.?, marketUrl.?, isProcessing, ts, lm, v) <> ((PublicStateEntity.apply _).tupled, PublicStateEntity.unapply)
+    def * =
+      (
+        id.?,
+        speculationId,
+        name,
+        logo.?,
+        goddess,
+        status,
+        startedAt.?,
+        marketUrl.?,
+        params,
+        isProcessing,
+        ts,
+        lm,
+        v
+      ) <> ((PublicStateEntity.apply _).tupled, PublicStateEntity.unapply)
   }
 
   private val PublicStates = TableQuery[PublicStatesTable]

@@ -12,9 +12,9 @@ case class PrivateStateEntity(
     name: String,
     logo: Option[UUID],
     socialOrder: SocialOrder.Value,
-    master: Option[UUID],
+    masterId: Option[UUID],
     createdBy: UUID,
-    journalist: Option[UUID],
+    journalistId: Option[UUID],
     ts: OffsetDateTime,
     lm: OffsetDateTime,
     v: Int
@@ -31,9 +31,9 @@ object PrivateStateEntity {
       name = name,
       logo = None,
       socialOrder = socialOrder,
-      master = None,
+      masterId = None,
       createdBy = createdBy.id.get,
-      journalist = None,
+      journalistId = None,
       ts = now,
       lm = now,
       v = 0

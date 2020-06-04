@@ -1,11 +1,12 @@
+import com.killbirds.sbt.sbtrelease.gitflow.Steps._
+import ReleaseTransformations._
+
 name := """dgdg-backend"""
 organization := "net.weltuebergang"
-
-version := "1.0-SNAPSHOT"
+scalaVersion := "2.13.2"
+maintainer := "markus@toto.io"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala, SwaggerPlugin)
-
-scalaVersion := "2.13.2"
 
 libraryDependencies += guice
 libraryDependencies += ws
@@ -30,6 +31,25 @@ fork in Test := true
 parallelExecution in Test := false
 
 swaggerDomainNameSpaces := Seq("controllers.api", "persistence.model", "commons")
+
+/**
+ * customize release process
+ */
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies, // : ReleaseStep
+  checkGitFlowExists, // : ReleaseStep
+  inquireVersions, // : ReleaseStep
+  runClean, // : ReleaseStep
+  runTest, // : ReleaseStep
+  gitFlowReleaseStart, // : ReleaseStep
+  setReleaseVersion, // : ReleaseStep
+  commitReleaseVersion, // : ReleaseStep, performs the initial git checks
+  gitFlowReleaseFinish, // : ReleaseStep
+  setNextVersion, // : ReleaseStep
+  commitNextVersion, // : ReleaseStep
+  pushChanges, // : ReleaseStep, also checks that an upstream branch is properly configured
+  pushMaster // : ReleaseStep
+)
 
 scalacOptions in Compile ++= Seq(
   "-deprecation", // Emit warning and location for usages of deprecated APIs.

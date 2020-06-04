@@ -1,9 +1,10 @@
 package persistence
 
 import com.github.tminglei.slickpg._
-import persistence.model.{EmailStatus, PublicStateStatus, SocialOrder, UserRole}
+import persistence.model._
 import play.api.libs.json.{JsValue, Json}
-import slick.jdbc.JdbcType
+import slick.basic.Capability
+import slick.jdbc.{JdbcCapabilities, JdbcType}
 
 trait AppPostgresProfile
     extends ExPostgresProfile
@@ -18,6 +19,8 @@ trait AppPostgresProfile
     with PgLTreeSupport {
 
   def pgjson = "jsonb"
+
+  override protected def computeCapabilities: Set[Capability] = super.computeCapabilities + JdbcCapabilities.insertOrUpdate
 
   override val api = BackendApi
 
@@ -45,6 +48,10 @@ trait AppPostgresProfile
     implicit val publicStateStatusTypeMapper: JdbcType[PublicStateStatus.Value] = createEnumJdbcType("status", PublicStateStatus)
 
     implicit val socialOrderTypeMapper: JdbcType[SocialOrder.Value] = createEnumJdbcType("social_order", SocialOrder)
+
+    implicit val citizenshipEndReasonTypeMapper: JdbcType[CitizenshipEndReason.Value] = createEnumJdbcType("end_reason", CitizenshipEndReason)
+
+    implicit val publicStateParamsTypeMapper = MappedJdbcType.base[PublicStateParams, JsValue](Json.toJson(_), _.as[PublicStateParams])
   }
 }
 

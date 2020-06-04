@@ -22,14 +22,27 @@ class PrivateStateDao @Inject()(protected val dbConfigProvider: DatabaseConfigPr
     def name: Rep[String]                   = column[String]("name")
     def logo: Rep[UUID]                     = column[UUID]("logo")
     def socialOrder: Rep[SocialOrder.Value] = column[SocialOrder.Value]("social_order")
-    def master: Rep[UUID]                   = column[UUID]("master")
+    def masterId: Rep[UUID]                 = column[UUID]("master_id")
     def createdBy: Rep[UUID]                = column[UUID]("created_by")
-    def journalist: Rep[UUID]               = column[UUID]("journalist")
+    def journalistId: Rep[UUID]             = column[UUID]("journalist_id")
     def ts: Rep[OffsetDateTime]             = column[OffsetDateTime]("ts")
     def lm: Rep[OffsetDateTime]             = column[OffsetDateTime]("lm")
     def v: Rep[Int]                         = column[Int]("v")
 
-    def * = (id.?, publicStateId, name, logo.?, socialOrder, master.?, createdBy, journalist.?, ts, lm, v) <> ((PrivateStateEntity.apply _).tupled, PrivateStateEntity.unapply)
+    def * =
+      (
+        id.?,
+        publicStateId,
+        name,
+        logo.?,
+        socialOrder,
+        masterId.?,
+        createdBy,
+        journalistId.?,
+        ts,
+        lm,
+        v
+      ) <> ((PrivateStateEntity.apply _).tupled, PrivateStateEntity.unapply)
   }
 
   private val PrivateStates = TableQuery[PrivateStateTable]

@@ -1,4 +1,7 @@
+lazy val gitflowPlugin = RootProject(uri("https://github.com/killbirds/sbt-gitflow.git#0.4"))
+lazy val root = (project in file(".")).dependsOn(gitflowPlugin)
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.1")
 addSbtPlugin("org.foundweekends.giter8" % "sbt-giter8-scaffold" % "0.11.0")
 addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.3.1")
 addSbtPlugin("com.iheart" % "sbt-play-swagger" % "0.9.1-PLAY2.8")
+addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.6")

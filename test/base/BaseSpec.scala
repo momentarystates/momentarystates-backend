@@ -10,8 +10,9 @@ abstract class BaseSpec extends SpecWithDatabase {
 
   object AuthApi {
     def registerUser(username: String, password: String): Unit = {
+      val email = s"$username@example.com"
       val request  = FakeRequest(POST, "/api/auth/register").withHeaders(HeaderNames.CONTENT_TYPE -> "application/json")
-      val payload  = Json.toJson(RegisterUser(username, password))
+      val payload  = Json.toJson(RegisterUser(username, password, email))
       val response = route(app, request, payload).get
       status(response) mustBe OK
     }

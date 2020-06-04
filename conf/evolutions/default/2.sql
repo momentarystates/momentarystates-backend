@@ -19,7 +19,7 @@ CREATE TABLE public_states
     speculation_id          UUID                NOT NULL REFERENCES "speculations",
     name                    varchar(128)        NOT NULL UNIQUE,
     logo                    UUID,
-    goddess                 UUID                NOT NULL REFERENCES "users",
+    goddess_id              UUID                NOT NULL REFERENCES "users",
     status                  public_state_status NOT NULL,
     started_at              timestamptz,
     market_url              varchar(512),
@@ -59,9 +59,9 @@ CREATE TABLE citizens
     v                       int                 NOT NULL
 );
 
-ALTER TABLE private_states ADD COLUMN master UUID REFERENCES "citizens";
+ALTER TABLE private_states ADD COLUMN master_id UUID REFERENCES "citizens";
 
-ALTER TABLE private_states ADD COLUMN journalist UUID REFERENCES "citizens";
+ALTER TABLE private_states ADD COLUMN journalist_id UUID REFERENCES "citizens";
 
 
 # --- !Downs

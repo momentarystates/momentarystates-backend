@@ -36,7 +36,7 @@ case class PublicStateEntity(
     speculationId: UUID,
     name: String,
     logo: Option[UUID],
-    goddess: UUID,
+    goddessId: UUID,
     status: PublicStateStatus.Value,
     startedAt: Option[OffsetDateTime],
     marketUrl: Option[String],
@@ -50,13 +50,13 @@ case class PublicStateEntity(
 object PublicStateEntity {
   implicit val jsonFormat: Format[PublicStateEntity] = Json.format[PublicStateEntity]
 
-  def generate(speculationId: UUID, name: String, goddess: UUID, params: PublicStateParams): PublicStateEntity = {
+  def generate(speculationId: UUID, name: String, goddessId: UUID, params: PublicStateParams): PublicStateEntity = {
     val now = AppUtils.now
     PublicStateEntity(
       id = Option(UUID.randomUUID),
       speculationId = speculationId,
       name = name,
-      goddess = goddess,
+      goddessId = goddessId,
       logo = None,
       status = PublicStateStatus.Created,
       params = params,

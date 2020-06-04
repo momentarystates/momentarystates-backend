@@ -1,0 +1,32 @@
+
+
+###
+# summary: Create a new public state
+# description: |
+#   Creates a new public state. Please see the specified request payload. The `token` and the
+#   `speculationId` will be provided via email after an `Admin` has created a new speculation. Please
+#   see `POST /api/admin/speculation` for more information.
+#
+#   Except the name, all other params are optional and will be set to default values if not specified
+#   in the request. Durations in general need to be defined in seconds!
+# operationId: admin-create-speculation
+# parameters:
+#   - name: body
+#     in: body
+#     required: true
+#     schema:
+#       type: object
+#       $ref: '#/definitions/controllers.api.game.GameProtocol.CreatePublicState'
+# responses:
+#   200:
+#     description: Successful response with a public state entity.
+#     schema:
+#       type: object
+#       $ref: '#/definitions/persistence.model.PublicStateEntity'
+#   400:
+#     description: |
+#       In case something went wrong check the error code.
+#     schema:
+#       $ref: '#/definitions/commons.AppError'
+###
+POST /speculation controllers.api.admin.AdminSpeculationController.create()

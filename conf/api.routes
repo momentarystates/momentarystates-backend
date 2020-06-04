@@ -1,7 +1,8 @@
 # api routes
 
--> /auth        api.auth.Routes
 -> /admin       api.admin.Routes
+-> /auth        api.auth.Routes
+-> /game        api.game.Routes
 -> /user        api.user.Routes
 
 ### NoDocs ###

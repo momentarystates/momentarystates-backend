@@ -20,7 +20,7 @@
 #     schema:
 #       $ref: '#/definitions/commons.AppError'
 ###
-POST    /setup/:token controllers.api.admin.AdminSetupController.setup(token: String)
+POST /setup/:token controllers.api.admin.AdminSetupController.setup(token: String)
 
 
 ###
@@ -40,7 +40,7 @@ POST    /setup/:token controllers.api.admin.AdminSetupController.setup(token: St
 #       type: array
 #       $ref: '#/definitions/controllers.api.admin.AdminProtocol.AdminUser'
 ###
-GET     /user/search controllers.api.admin.AdminUserController.search()
+GET /user/search controllers.api.admin.AdminUserController.search()
 
 
 ###
@@ -59,4 +59,33 @@ GET     /user/search controllers.api.admin.AdminUserController.search()
 #     schema:
 #       $ref: '#/definitions/controllers.api.admin.AdminProtocol.AdminUser'
 ###
-GET     /user/:userId controllers.api.admin.AdminUserController.get(userId: java.util.UUID)
+GET /user/:userId controllers.api.admin.AdminUserController.get(userId: java.util.UUID)
+
+
+###
+# summary: Create a new speculation
+# description: |
+#   Creates a new speculation. In this request an email needs to be specified. An invitation to create a new
+#   public state is then send to this email address. The email will also contain a token which can optionally
+#   be specified with the request. If not specified, the backend will generate one.
+# operationId: admin-create-speculation
+# parameters:
+#   - name: body
+#     in: body
+#     required: true
+#     schema:
+#       type: object
+#       $ref: '#/definitions/controllers.api.admin.AdminProtocol.CreateSpeculation'
+# responses:
+#   200:
+#     description: Successful response with a speculation entity.
+#     schema:
+#       type: object
+#       $ref: '#/definitions/persistence.model.SpeculationEntity'
+#   400:
+#     description: |
+#       In case something went wrong check the error code.
+#     schema:
+#       $ref: '#/definitions/commons.AppError'
+###
+POST /speculation controllers.api.admin.AdminSpeculationController.create()

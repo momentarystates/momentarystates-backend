@@ -13,8 +13,9 @@ class RegisterUserControllerSpec extends BaseSpec {
     "succeed" in withDatabase {
       val username = s"testuser-${rnd(10)}"
       val password = rnd(50)
+      val email = s"$username@example.com"
       val request = FakeRequest(POST, "/api/auth/register").withHeaders(HeaderNames.CONTENT_TYPE -> "application/json")
-      val payload = Json.toJson(RegisterUser(username, password))
+      val payload = Json.toJson(RegisterUser(username, password, email))
       val response = route(app, request, payload).get
       status(response) mustBe OK
     }
@@ -22,17 +23,18 @@ class RegisterUserControllerSpec extends BaseSpec {
     "fail with existing username" in withDatabase {
       val username = s"testuser-${rnd(10)}"
       val password = rnd(50)
+      val email = s"$username@example.com"
 
       {
         val request = FakeRequest(POST, "/api/auth/register").withHeaders(HeaderNames.CONTENT_TYPE -> "application/json")
-        val payload = Json.toJson(RegisterUser(username, password))
+        val payload = Json.toJson(RegisterUser(username, password, email))
         val response = route(app, request, payload).get
         status(response) mustBe OK
       }
 
       {
         val request = FakeRequest(POST, "/api/auth/register").withHeaders(HeaderNames.CONTENT_TYPE -> "application/json")
-        val payload = Json.toJson(RegisterUser(username, password))
+        val payload = Json.toJson(RegisterUser(username, password, email))
         val response = route(app, request, payload).get
         status(response) mustBe BAD_REQUEST
       }

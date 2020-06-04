@@ -33,7 +33,7 @@ class PublicStateController @Inject()(
         ruleProposalDuration = in.ruleProposalDuration.getOrElse(500),
         ruleProposalIncrement = in.ruleProposalIncrement.getOrElse(10)
       )
-      val entity = PublicStateEntity.generate(speculationId = speculation.id.get, name = in.name, goddess = request.auth.user.id.get, params = params)
+      val entity = PublicStateEntity.generate(speculationId = speculation.id.get, name = in.name, goddessId = request.auth.user.id.get, params = params)
       publicStateDao.insert(entity) map {
         case Left(error) => -\/(AppErrors.DatabaseError(error))
         case Right(uuid) => \/-(entity.copy(id = Option(uuid)))

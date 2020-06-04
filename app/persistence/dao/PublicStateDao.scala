@@ -21,7 +21,7 @@ class PublicStateDao @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     def speculationId: Rep[UUID]             = column[UUID]("speculation_id")
     def name: Rep[String]                    = column[String]("name")
     def logo: Rep[UUID]                      = column[UUID]("logo")
-    def goddess: Rep[UUID]                   = column[UUID]("goddess")
+    def goddessId: Rep[UUID]                 = column[UUID]("goddess_id")
     def status: Rep[PublicStateStatus.Value] = column[PublicStateStatus.Value]("status")
     def params: Rep[PublicStateParams]       = column[PublicStateParams]("params")
     def startedAt: Rep[OffsetDateTime]       = column[OffsetDateTime]("started_at")
@@ -37,7 +37,7 @@ class PublicStateDao @Inject()(protected val dbConfigProvider: DatabaseConfigPro
         speculationId,
         name,
         logo.?,
-        goddess,
+        goddessId,
         status,
         startedAt.?,
         marketUrl.?,

@@ -1,24 +1,36 @@
 
 # --- !Ups
 
+CREATE TABLE speculations
+(
+    id                      UUID                NOT NULL PRIMARY KEY,
+    email                   varchar(320)        NOT NULL,
+    token                   varchar(16)         NOT NULL,
+    ts                      timestamptz         NOT NULL,
+    lm                      timestamptz         NOT NULL,
+    v                       int                 NOT NULL
+);
+
 CREATE TYPE public_state_status AS ENUM ('Created', 'Running', 'Finished');
 
 CREATE TABLE public_states
 (
     id                      UUID                NOT NULL PRIMARY KEY,
+    speculation_id          UUID                NOT NULL REFERENCES "speculations",
     name                    varchar(128)        NOT NULL UNIQUE,
     logo                    UUID,
-    game_master             UUID                NOT NULL REFERENCES "users",
+    goddess                 UUID                NOT NULL REFERENCES "users",
     status                  public_state_status NOT NULL,
-    min_citizen_per_state   int                 NOT NULL,
-    max_citizen_per_state   int                 NOT NULL,
     started_at              timestamptz,
     market_url              varchar(512),
+    params                  json                NOT NULL,
     is_processing           boolean             NOT NULL,
     ts                      timestamptz         NOT NULL,
     lm                      timestamptz         NOT NULL,
     v                       int                 NOT NULL
 );
+
+ALTER TABLE speculations ADD COLUMN public_state_id UUID REFERENCES "public_states";
 
 CREATE TYPE social_order AS ENUM ('SinglePerson', 'SimpleMajority', 'Consensus', 'SinglePersonRotation');
 
@@ -54,6 +66,7 @@ ALTER TABLE private_states ADD COLUMN journalist UUID REFERENCES "citizens";
 
 # --- !Downs
 
+DROP TABLE speculations CASCADE;
 DROP TABLE public_states CASCADE;
 DROP TYPE public_state_status;
 DROP TABLE private_states CASCADE;

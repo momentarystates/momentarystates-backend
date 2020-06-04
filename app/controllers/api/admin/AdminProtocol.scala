@@ -4,7 +4,9 @@ import java.time.OffsetDateTime
 import java.util.UUID
 
 import persistence.model.{UserEntity, UserRole}
-import play.api.libs.json.{Format, Json}
+import play.api.libs.functional.syntax._
+import play.api.libs.json.Reads.email
+import play.api.libs.json._
 
 object AdminProtocol {
 
@@ -38,13 +40,18 @@ object AdminProtocol {
     }
   }
 
-  case class CreatePublicState(
-      name: String,
-      gameMasterEmail: String
+  case class CreateSpeculation(
+      email: String,
+      token: Option[String]
   )
 
-  object CreatePublicState {
-    implicit val jsonFormat: Format[CreatePublicState] = Json.format[CreatePublicState]
+  object CreateSpeculation {
+    implicit val jsonReads: Reads[CreateSpeculation] = (
+      (__ \ "email").read[String](email) and
+        (__ \ "token").readNullable[String]
+    )(CreateSpeculation.apply _)
+
+    implicit val jsonWrites: Writes[CreateSpeculation] = Json.writes[CreateSpeculation]
   }
 
 }

@@ -9,5 +9,6 @@ target
 /RUNNING_PID
 
 /conf/local.conf
+/footage/devlog.md
 
 .DS_Store

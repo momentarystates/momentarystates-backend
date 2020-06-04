@@ -32,7 +32,7 @@ class AuthService @Inject()(
     res.run
   }
 
-  def createAuthToken(user: UserEntity, remoteAddress: String) = {
+  def createAuthToken(user: UserEntity, remoteAddress: String): Future[AppError \/ AuthTokenEntity] = {
 
     val expires = authTokenExpiresAfter match {
       case "never" => None

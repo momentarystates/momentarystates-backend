@@ -23,4 +23,5 @@ object AppErrors {
   val MailerError: AppError                       = AppError("app:20", "mailer error")
   val UnknownS3ServiceError: AppError             = AppError("blob:0", "unknown s3 storage error")
   val AccessS3BucketError: AppError               = AppError("blob:1", "error accessing s3 storage")
+  val InvalidSpeculationTokenError: AppError      = AppError("game:1", "invalid speculation token");
 }

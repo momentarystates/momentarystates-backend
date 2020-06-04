@@ -78,7 +78,10 @@ GET /user/:userId controllers.api.admin.AdminUserController.get(userId: java.uti
 #       $ref: '#/definitions/controllers.api.admin.AdminProtocol.CreateSpeculation'
 # responses:
 #   200:
-#     description: Successful response with empty response.
+#     description: Successful response with a speculation entity.
+#     schema:
+#       type: object
+#       $ref: '#/definitions/persistence.model.SpeculationEntity'
 #   400:
 #     description: |
 #       In case something went wrong check the error code.

@@ -1,5 +1,7 @@
 package controllers.api.admin
 
+import java.util.UUID
+
 import commons._
 import controllers.api.admin.AdminProtocol.CreateSpeculation
 import controllers.{AppActions, AppErrors, ControllerHelper}
@@ -24,11 +26,11 @@ class AdminSpeculationController @Inject()(
     with ControllerHelper {
 
   def create(): EssentialAction = actions.AdminAction().async(parse.json) { implicit request =>
-    val domain                = config.get[String]("app.domain")
-    val registerPath          = config.get[String]("app.ui.registerPath")
-    val createPublicStatePath = config.get[String]("app.ui.createPublicStatePath")
-    val registerUrl           = domain + registerPath
-    val createPublicStateUrl  = domain + createPublicStatePath
+    val domain                                                   = config.get[String]("app.domain")
+    val registerPath                                             = config.get[String]("app.ui.registerPath")
+    val createPublicStatePath                                    = config.get[String]("app.ui.createPublicStatePath")
+    val registerUrl                                              = domain + registerPath
+    def createPublicStateUrl(token: String, speculationId: UUID) = domain + createPublicStatePath.replace(":token", token).replace(":speculationId", speculationId.toString)
 
     def createSpeculation(in: CreateSpeculation) = {
       val speculation = SpeculationEntity.generate(in.email, in.token)
@@ -39,7 +41,7 @@ class AdminSpeculationController @Inject()(
     }
 
     def sendEmail(in: CreateSpeculation, speculation: SpeculationEntity) = {
-      val template = EmailTemplate.getCreatePublicStateEmailTemplate(request.auth.user.username, speculation.token, createPublicStateUrl, registerUrl)
+      val template = EmailTemplate.getCreatePublicStateEmailTemplate(request.auth.user.username, speculation.token, createPublicStateUrl(speculation.token, speculation.id.get), registerUrl)
       val email    = EmailEntity.generate(template.subject, List(in.email), template.body)
       emailDao.insert(email) map {
         case Left(error) => Option(AppErrors.DatabaseError(error))

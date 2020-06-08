@@ -1,11 +1,13 @@
 package controllers.api.game
 
+import java.util.UUID
+
 import commons._
 import controllers.api.game.GameProtocol.CreatePublicState
 import controllers.{AppActions, AppErrors, ControllerHelper}
 import javax.inject.{Inject, Singleton}
 import persistence.dao.{PublicStateDao, SpeculationDao}
-import persistence.model.{PublicStateEntity, PublicStateParams, SpeculationEntity}
+import persistence.model.{PublicStateEntity, PublicStateParams, PublicStateStatus, SpeculationEntity}
 import play.api.mvc.{AbstractController, ControllerComponents, EssentialAction}
 import scalaz.Scalaz._
 import scalaz.{-\/, \/-}
@@ -50,4 +52,19 @@ class PublicStateController @Inject()(
     res.runResult()
   }
 
+  def start(id: UUID): EssentialAction = actions.GoddessAction(id).async { implicit request =>
+    val res = for {
+      _                  <- AppResult(request.publicState.status == PublicStateStatus.Created)(AppErrors.InvalidPublicStateStatusError)
+      updatedPublicState <- publicStateDao.update(request.publicState.copy(status = PublicStateStatus.Running)).toAppResult()
+    } yield updatedPublicState
+
+    res.runResult()
+  }
+
+  def stop(id: UUID): EssentialAction = actions.RunningPublicStateAction(id).async { implicit request =>
+    publicStateDao
+      .update(request.publicState.copy(status = PublicStateStatus.Finished))
+      .toAppResult()
+      .runResult()
+  }
 }

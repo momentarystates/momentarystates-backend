@@ -24,4 +24,6 @@ object AppErrors {
   val UnknownS3ServiceError: AppError             = AppError("blob:0", "unknown s3 storage error")
   val AccessS3BucketError: AppError               = AppError("blob:1", "error accessing s3 storage")
   val InvalidSpeculationTokenError: AppError      = AppError("game:1", "invalid speculation token");
+  val InvalidGoddessError: AppError               = AppError("game:2", "requesting user is not goddess of public state")
+  val InvalidPublicStateStatusError: AppError     = AppError("game:3", "the public state is in a wrong status")
 }

@@ -29,4 +29,65 @@
 #     schema:
 #       $ref: '#/definitions/commons.AppError'
 ###
-POST /speculation controllers.api.admin.AdminSpeculationController.create()
+POST /public-state controllers.api.game.PublicStateController.create()
+
+
+###
+# summary: Start the game for a public state
+# description: |
+#   Start a speculation respectively a public state. This means, from this moment on the public state
+#   is constantly processed by the backend in defined periods of time.
+#
+#   This api endpoint can only be called by the goddess that is associated with the public state specified via
+#   path parameter `id`. Otherwise, an error is returned.
+# operationId: game-public-state-start
+# parameters:
+#   - name: id
+#     in: path
+#     description: the id of the public state
+#     required: true
+#     type: uuid
+# responses:
+#   200:
+#     description: Successful response with the updated public state entity.
+#     schema:
+#       type: object
+#       $ref: '#/definitions/persistence.model.PublicStateEntity'
+#   400:
+#     description: |
+#       In case something went wrong check the error code.
+#     schema:
+#       $ref: '#/definitions/commons.AppError'
+###
+PUT /public-state/:id/start controllers.api.game.PublicStateController.start(id: java.util.UUID)
+
+
+###
+# summary: Stop the game of a public state
+# description: |
+#   This will stop processing the public state. This endpoint should be called, if the goddess will explicitly
+#   finish a speculation. It does not need to be called to end a game after the `speculationDuration` has expired.
+#   This will be done automatically during processing of a public state.
+#
+#   This api endpoint can only be called by the goddess that is associated with the public state specified via
+#   path parameter `id`. Otherwise, an error is returned.
+# operationId: game-public-state-start
+# parameters:
+#   - name: id
+#     in: path
+#     description: the id of the public state
+#     required: true
+#     type: uuid
+# responses:
+#   200:
+#     description: Successful response with the updated public state entity.
+#     schema:
+#       type: object
+#       $ref: '#/definitions/persistence.model.PublicStateEntity'
+#   400:
+#     description: |
+#       In case something went wrong check the error code.
+#     schema:
+#       $ref: '#/definitions/commons.AppError'
+###
+PUT /public-state/:id/stop controllers.api.game.PublicStateController.stop(id: java.util.UUID)

@@ -20,6 +20,7 @@ class CitizenDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
     def id: Rep[UUID]                              = column[UUID]("id", O.PrimaryKey)
     def userId: Rep[UUID]                          = column[UUID]("user_id")
     def privateStateId: Rep[UUID]                  = column[UUID]("private_state_id")
+    def name: Rep[String]                          = column[String]("name")
     def avatar: Rep[UUID]                          = column[UUID]("avatar")
     def startedAt: Rep[OffsetDateTime]             = column[OffsetDateTime]("started_at")
     def endedAt: Rep[OffsetDateTime]               = column[OffsetDateTime]("ended_at")
@@ -33,6 +34,7 @@ class CitizenDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
         id.?,
         userId,
         privateStateId,
+        name,
         avatar.?,
         startedAt,
         endedAt.?,

@@ -38,6 +38,8 @@ trait AppPostgresProfile
 
     implicit val strListTypeMapper = new SimpleArrayJdbcType[String]("text").to(_.toList)
 
+    implicit val strSeqTypeMapper = new SimpleArrayJdbcType[String]("text").to(_.toSeq)
+
     implicit val playJsonArrayTypeMapper =
       new AdvancedArrayJdbcType[JsValue](pgjson, (s) => utils.SimpleArrayUtils.fromString[JsValue](Json.parse)(s).orNull, (v) => utils.SimpleArrayUtils.mkString[JsValue](_.toString())(v)).to(_.toList)
 
@@ -52,6 +54,8 @@ trait AppPostgresProfile
     implicit val citizenshipEndReasonTypeMapper: JdbcType[CitizenshipEndReason.Value] = createEnumJdbcType("end_reason", CitizenshipEndReason)
 
     implicit val publicStateParamsTypeMapper = MappedJdbcType.base[PublicStateParams, JsValue](Json.toJson(_), _.as[PublicStateParams])
+
+    implicit val privateStateStatusTypeMapper: JdbcType[PrivateStateStatus.Value] = createEnumJdbcType("end_reason", PrivateStateStatus)
   }
 }
 

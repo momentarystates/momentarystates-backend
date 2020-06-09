@@ -7,7 +7,7 @@ import commons.AppUtils
 import javax.inject.{Inject, Singleton}
 import org.postgresql.util.PSQLException
 import persistence.AppPostgresProfile.api._
-import persistence.model.{PrivateStateEntity, SocialOrder}
+import persistence.model.{PrivateStateEntity, PrivateStateStatus, SocialOrder}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 
@@ -17,17 +17,19 @@ import scala.concurrent.{ExecutionContext, Future}
 class PrivateStateDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) extends HasDatabaseConfigProvider[JdbcProfile] with DaoHelper {
 
   private class PrivateStateTable(tag: Tag) extends Table[PrivateStateEntity](tag, "private_states") {
-    def id: Rep[UUID]                       = column[UUID]("id", O.PrimaryKey)
-    def publicStateId: Rep[UUID]            = column[UUID]("public_state_id")
-    def name: Rep[String]                   = column[String]("name")
-    def logo: Rep[UUID]                     = column[UUID]("logo")
-    def socialOrder: Rep[SocialOrder.Value] = column[SocialOrder.Value]("social_order")
-    def masterId: Rep[UUID]                 = column[UUID]("master_id")
-    def createdBy: Rep[UUID]                = column[UUID]("created_by")
-    def journalistId: Rep[UUID]             = column[UUID]("journalist_id")
-    def ts: Rep[OffsetDateTime]             = column[OffsetDateTime]("ts")
-    def lm: Rep[OffsetDateTime]             = column[OffsetDateTime]("lm")
-    def v: Rep[Int]                         = column[Int]("v")
+    def id: Rep[UUID]                         = column[UUID]("id", O.PrimaryKey)
+    def publicStateId: Rep[UUID]              = column[UUID]("public_state_id")
+    def name: Rep[String]                     = column[String]("name")
+    def logo: Rep[UUID]                       = column[UUID]("logo")
+    def socialOrder: Rep[SocialOrder.Value]   = column[SocialOrder.Value]("social_order")
+    def masterId: Rep[UUID]                   = column[UUID]("master_id")
+    def createdBy: Rep[UUID]                  = column[UUID]("created_by")
+    def status: Rep[PrivateStateStatus.Value] = column[PrivateStateStatus.Value]("status")
+    def journalistId: Rep[UUID]               = column[UUID]("journalist_id")
+    def characteristics: Rep[Seq[String]]     = column[Seq[String]]("characteristics")
+    def ts: Rep[OffsetDateTime]               = column[OffsetDateTime]("ts")
+    def lm: Rep[OffsetDateTime]               = column[OffsetDateTime]("lm")
+    def v: Rep[Int]                           = column[Int]("v")
 
     def * =
       (
@@ -38,7 +40,9 @@ class PrivateStateDao @Inject()(protected val dbConfigProvider: DatabaseConfigPr
         socialOrder,
         masterId.?,
         createdBy,
+        status,
         journalistId.?,
+        characteristics,
         ts,
         lm,
         v

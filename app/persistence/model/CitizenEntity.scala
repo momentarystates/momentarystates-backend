@@ -16,6 +16,7 @@ case class CitizenEntity(
     id: Option[UUID],
     userId: UUID,
     privateStateId: UUID,
+    name: String,
     avatar: Option[UUID],
     startedAt: OffsetDateTime,
     endedAt: Option[OffsetDateTime],

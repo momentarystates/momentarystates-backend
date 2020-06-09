@@ -42,7 +42,7 @@ class RegisterUserController @Inject()(
           |<p>have fun ;-)</p>
           |<p>your dgdg admin</p>
           |""".stripMargin
-      val email = EmailEntity.generate(subject, List(user.email), body)
+      val email = EmailEntity.generate(subject, Seq(user.email), body)
       emailDao.insert(email) map {
         case Left(error) => -\/(AppErrors.DatabaseError(error))
         case Right(uuid) => \/-(email.copy(id = Option(uuid)))

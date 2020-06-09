@@ -16,7 +16,7 @@ object EmailStatus extends Enumeration {
 case class EmailEntity(
     id: Option[UUID],
     subject: String,
-    recipients: List[String],
+    recipients: Seq[String],
     body: String,
     status: EmailStatus.Value,
     messageId: Option[String],
@@ -29,7 +29,7 @@ case class EmailEntity(
 object EmailEntity {
   implicit val jsonFormat: Format[EmailEntity] = Json.format[EmailEntity]
 
-  def generate(subject: String, recipients: List[String], body: String): EmailEntity = {
+  def generate(subject: String, recipients: Seq[String], body: String): EmailEntity = {
     val now = AppUtils.now
     EmailEntity(
       id = Option(UUID.randomUUID()),

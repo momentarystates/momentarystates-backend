@@ -31,9 +31,9 @@ class PublicStateController @Inject()(
         consensusFactor = in.consensusFactor.getOrElse(100),
         sizeInfluence = in.sizeInfluence.getOrElse(0.0f),
         speculationDuration = in.speculationDuration.getOrElse(10800), // 3 hours
-        rotationDuration = in.rotationDuration.getOrElse(100),
-        ruleProposalDuration = in.ruleProposalDuration.getOrElse(500),
-        ruleProposalIncrement = in.ruleProposalIncrement.getOrElse(10)
+        rotationDuration = in.rotationDuration.getOrElse(1200), // 20 minutes
+        ruleProposalDuration = in.ruleProposalDuration.getOrElse(1200), // 20 minutes
+        ruleProposalIncrement = in.ruleProposalIncrement.getOrElse(60)  // 1 minute
       )
       val entity = PublicStateEntity.generate(speculationId = speculation.id.get, name = in.name, goddessId = request.auth.user.id.get, params = params)
       publicStateDao.insert(entity) map {

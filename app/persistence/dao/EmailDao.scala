@@ -19,7 +19,7 @@ class EmailDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
   private class EmailsTable(tag: Tag) extends Table[EmailEntity](tag, "emails") {
     def id: Rep[UUID]                  = column[UUID]("id", O.PrimaryKey)
     def subject: Rep[String]           = column[String]("subject")
-    def recipients: Rep[List[String]]  = column[List[String]]("recipients")
+    def recipients: Rep[Seq[String]]   = column[Seq[String]]("recipients")
     def body: Rep[String]              = column[String]("body")
     def status: Rep[EmailStatus.Value] = column[EmailStatus.Value]("status")
     def messageId: Rep[String]         = column[String]("message_id")

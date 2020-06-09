@@ -3,7 +3,7 @@ swagger: "2.0"
 info:
   title: "Momentary States - API"
   description: |
-    ## Work in prgress for the prototype ;-)
+    ## Work in progress for the prototype ;-)
 
     # 🚀
 consumes:

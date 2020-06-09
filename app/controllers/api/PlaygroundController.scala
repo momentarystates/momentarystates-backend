@@ -45,7 +45,7 @@ class PlaygroundController @Inject()(
         |This is a test email sent for debugging purposes
         |</p>
         |""".stripMargin
-    val email = EmailEntity.generate("Test Email", List("markus@toto.io", "markus@silverorbit.de"), body)
+    val email = EmailEntity.generate("Test Email", Seq("markus@toto.io", "markus@silverorbit.de"), body)
     emailDao.insert(email) flatMap {
       case Left(error) => Future.successful(BadRequest(error))
       case Right(uuid) =>

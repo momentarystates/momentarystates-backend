@@ -42,7 +42,7 @@ class AdminSpeculationController @Inject()(
 
     def sendEmail(in: CreateSpeculation, speculation: SpeculationEntity) = {
       val template = EmailTemplate.getCreatePublicStateEmailTemplate(request.auth.user.username, speculation.token, createPublicStateUrl(speculation.token, speculation.id.get), registerUrl)
-      val email    = EmailEntity.generate(template.subject, List(in.email), template.body)
+      val email    = EmailEntity.generate(template.subject, Seq(in.email), template.body)
       emailDao.insert(email) map {
         case Left(error) => Option(AppErrors.DatabaseError(error))
         case Right(_)    => None

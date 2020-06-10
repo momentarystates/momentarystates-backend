@@ -3,11 +3,12 @@ package controllers.api.game
 import java.util.UUID
 
 import commons._
-import controllers.api.game.GameProtocol.CreatePublicState
+import controllers.api.game.GameProtocol.{CreatePublicState, PrivateStateInvite}
 import controllers.{AppActions, AppErrors, ControllerHelper}
 import javax.inject.{Inject, Singleton}
-import persistence.dao.{PublicStateDao, SpeculationDao}
-import persistence.model.{PublicStateEntity, PublicStateParams, PublicStateStatus, SpeculationEntity}
+import persistence.dao.{CreatePrivateStateInviteDao, EmailDao, PublicStateDao, SpeculationDao}
+import persistence.model._
+import play.api.Configuration
 import play.api.mvc.{AbstractController, ControllerComponents, EssentialAction}
 import scalaz.Scalaz._
 import scalaz.{-\/, \/-}
@@ -19,7 +20,10 @@ class PublicStateController @Inject()(
     cc: ControllerComponents,
     actions: AppActions,
     speculationDao: SpeculationDao,
-    publicStateDao: PublicStateDao
+    publicStateDao: PublicStateDao,
+    emailDao: EmailDao,
+    createPrivateStateInviteDao: CreatePrivateStateInviteDao,
+    config: Configuration
 ) extends AbstractController(cc)
     with ControllerHelper {
 
@@ -33,7 +37,7 @@ class PublicStateController @Inject()(
         speculationDuration = in.speculationDuration.getOrElse(10800), // 3 hours
         rotationDuration = in.rotationDuration.getOrElse(1200), // 20 minutes
         ruleProposalDuration = in.ruleProposalDuration.getOrElse(1200), // 20 minutes
-        ruleProposalIncrement = in.ruleProposalIncrement.getOrElse(60)  // 1 minute
+        ruleProposalIncrement = in.ruleProposalIncrement.getOrElse(60) // 1 minute
       )
       val entity = PublicStateEntity.generate(speculationId = speculation.id.get, name = in.name, goddessId = request.auth.user.id.get, params = params)
       publicStateDao.insert(entity) map {
@@ -66,5 +70,38 @@ class PublicStateController @Inject()(
       .update(request.publicState.copy(status = PublicStateStatus.Finished))
       .toAppResult()
       .runResult()
+  }
+
+  def invite(id: UUID): EssentialAction = actions.RunningPublicStateAction(id).async(parse.json) { implicit request =>
+    val domain                                                    = config.get[String]("app.domain")
+    val registerPath                                              = config.get[String]("app.ui.registerPath")
+    val createPrivateStatePath                                     = config.get[String]("app.ui.createPrivateStatePath")
+    val registerUrl                                               = domain + registerPath
+    def createPrivateStateUrl(token: String, publicStateId: UUID) = domain + createPrivateStatePath.replace(":token", token).replace(":publicStateId", publicStateId.toString)
+
+    def createInvite(in: PrivateStateInvite, publicState: PublicStateEntity) = {
+      val entity = CreatePrivateStateInviteEntity.generate(publicState.id.get, in.email)
+      createPrivateStateInviteDao.insert(entity) map {
+        case Left(error) => -\/(AppErrors.DatabaseError(error))
+        case Right(uuid) => \/-(entity.copy(id = Option(uuid)))
+      }
+    }
+
+    def sendEmail(invite: CreatePrivateStateInviteEntity, publicState: PublicStateEntity) = {
+      val template = EmailTemplate.getCreatePrivateStateInviteEmailTemplate(request.auth.user.username, createPrivateStateUrl(invite.token, publicState.id.get), registerUrl)
+      val email    = EmailEntity.generate(template.subject, Seq(invite.email), template.body)
+      emailDao.insert(email) map {
+        case Left(error) => Option(AppErrors.DatabaseError(error))
+        case Right(_)    => None
+      }
+    }
+
+    val res = for {
+      in     <- AppResult[PrivateStateInvite](validateJson[PrivateStateInvite](request))
+      invite <- AppResult[CreatePrivateStateInviteEntity](createInvite(in, request.publicState))
+      _      <- AppResult.fromFutureOptionError(sendEmail(invite, request.publicState))
+    } yield ""
+
+    res.runResultEmptyOk()
   }
 }

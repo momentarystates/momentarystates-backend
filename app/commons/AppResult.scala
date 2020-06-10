@@ -42,6 +42,14 @@ object AppResult {
     }
   }
 
+  def fromOptionError(maybeError: Option[AppError])(implicit ec: ExecutionContext): AppResult[_] = {
+    val result = maybeError match {
+      case Some(error) => -\/(error)
+      case _ => \/-(true)
+    }
+    AppResult(Future.successful(result))
+  }
+
   def fromFuture[A](futureValue: Future[A])(implicit ec: ExecutionContext): AppResult[A] = {
     val wrappedFuture: Future[AppError \/ A] = futureValue.map(\/.right[AppError, A]).recover(wrapFutureFailure)
 

@@ -3,11 +3,13 @@ package controllers
 import java.util.{Date, UUID}
 
 import com.google.inject.Inject
-import persistence.dao.PublicStateDao
-import persistence.model.{PublicStateEntity, PublicStateStatus, UserEntity, UserRole}
+import commons._
+import persistence.dao.{CitizenDao, PrivateStateDao, PublicStateDao}
+import persistence.model._
 import play.api.Logger
 import play.api.libs.json.{Format, Json}
 import play.api.mvc._
+import scalaz.Scalaz._
 import scalaz.{-\/, \/-}
 import services.AuthService
 
@@ -18,7 +20,9 @@ class AppActions @Inject()(
     userAwareActionBuilder: UserAwareActionBuilder,
     anonymousActionRefiner: AnonymousActionRefiner,
     authenticatedActionRefiner: AuthenticatedActionRefiner,
-    publicStateDao: PublicStateDao
+    publicStateDao: PublicStateDao,
+    privateStateDao: PrivateStateDao,
+    citizenDao: CitizenDao
 ) {
   def LoggingAction: ActionBuilder[Request, AnyContent] = loggingActionBuilder
 
@@ -37,14 +41,14 @@ class AppActions @Inject()(
     }
   }
 
-  def GoddessAction(id: UUID)(implicit ec: ExecutionContext): ActionBuilder[GoddessRequest, AnyContent] = {
-    val refiner = new ActionRefiner[AuthenticatedRequest, GoddessRequest] {
+  def GoddessAction(id: UUID)(implicit ec: ExecutionContext): ActionBuilder[PublicStateRequest, AnyContent] = {
+    val refiner = new ActionRefiner[AuthenticatedRequest, PublicStateRequest] {
       override def executionContext: ExecutionContext = ec
 
-      override def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, GoddessRequest[A]]] = {
+      override def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, PublicStateRequest[A]]] = {
         publicStateDao.byId(id) map {
           case Some(publicState) =>
-            if (publicState.goddessId == request.auth.user.id.get) Right(new GoddessRequest[A](request, request.auth, publicState))
+            if (publicState.goddessId == request.auth.user.id.get) Right(new PublicStateRequest[A](request, request.auth, publicState))
             else Left(Results.BadRequest(Json.toJson(AppErrors.InvalidGoddessError)))
           case _ => Left(Results.BadRequest(Json.toJson(AppErrors.EntityNotFoundError("publicState"))))
         }
@@ -53,14 +57,50 @@ class AppActions @Inject()(
     AuthenticatedAction andThen refiner
   }
 
-  def RunningPublicStateAction(id: UUID)(implicit ec: ExecutionContext): ActionBuilder[GoddessRequest, AnyContent] = {
-    GoddessAction(id) andThen new ActionFilter[GoddessRequest] {
+  def RunningPublicStateAction(id: UUID)(implicit ec: ExecutionContext): ActionBuilder[PublicStateRequest, AnyContent] = {
+    GoddessAction(id) andThen new ActionFilter[PublicStateRequest] {
       override def executionContext: ExecutionContext = ec
 
-      override def filter[A](request: GoddessRequest[A]): Future[Option[Result]] = Future {
+      override def filter[A](request: PublicStateRequest[A]): Future[Option[Result]] = Future {
         if (request.publicState.status == PublicStateStatus.Running) None else Option(Results.BadRequest(Json.toJson(AppErrors.InvalidPublicStateStatusError)))
       }
     }
+  }
+
+  def PrivateStateAction(id: UUID)(implicit ec: ExecutionContext): ActionBuilder[PrivateStateRequest, AnyContent] = {
+    val refiner = new ActionRefiner[AuthenticatedRequest, PrivateStateRequest] {
+
+      override def executionContext: ExecutionContext = ec
+
+      override def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, PrivateStateRequest[A]]] = {
+        val res = for {
+          privateState <- privateStateDao.byId(id).handleEntityNotFound("privateState")
+          publicState  <- publicStateDao.byId(privateState.publicStateId).handleEntityNotFound("publicState")
+          _            <- AppResult(publicState.status == PublicStateStatus.Running)(AppErrors.InvalidPublicStateStatusError)
+        } yield (privateState, publicState)
+        res.run map {
+          case -\/(error) => Left(Results.BadRequest(Json.toJson(error)))
+          case \/-(data)  => Right(new PrivateStateRequest[A](request, request.auth, data._2, data._1))
+        }
+      }
+    }
+
+    AuthenticatedAction andThen refiner
+  }
+
+  def CitizenAction(id: UUID)(implicit ec: ExecutionContext): ActionBuilder[CitizenRequest, AnyContent] = {
+    val refiner = new ActionRefiner[PrivateStateRequest, CitizenRequest] {
+      override def executionContext: ExecutionContext = ec
+
+      override def refine[A](request: PrivateStateRequest[A]): Future[Either[Result, CitizenRequest[A]]] = {
+        citizenDao.byUserAndPrivateState(request.auth.user, request.privateState) map {
+          case Some(citizen) => Right(new CitizenRequest[A](request, request.auth, request.publicState, request.privateState, citizen))
+          case _             => Left(Results.BadRequest(Json.toJson(AppErrors.NotCitizenOfPrivateStateError)))
+        }
+      }
+    }
+
+    PrivateStateAction(id) andThen refiner
   }
 }
 
@@ -89,7 +129,12 @@ class UserAwareRequest[A](request: Request[A], val authOpt: Option[AuthPayload])
 
 class AuthenticatedRequest[A](request: Request[A], val auth: AuthPayload) extends WrappedRequest[A](request)
 
-class GoddessRequest[A](request: Request[A], val auth: AuthPayload, val publicState: PublicStateEntity) extends WrappedRequest[A](request)
+class PublicStateRequest[A](request: Request[A], val auth: AuthPayload, val publicState: PublicStateEntity) extends WrappedRequest[A](request)
+
+class PrivateStateRequest[A](request: Request[A], val auth: AuthPayload, val publicState: PublicStateEntity, val privateState: PrivateStateEntity) extends WrappedRequest[A](request)
+
+class CitizenRequest[A](request: Request[A], val auth: AuthPayload, val publicState: PublicStateEntity, val privateState: PrivateStateEntity, val citizen: CitizenEntity)
+    extends WrappedRequest[A](request)
 
 class UserAwareActionBuilder @Inject()(
     val parser: BodyParsers.Default,

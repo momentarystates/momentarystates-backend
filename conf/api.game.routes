@@ -91,3 +91,15 @@ PUT /public-state/:id/start controllers.api.game.PublicStateController.start(id:
 #       $ref: '#/definitions/commons.AppError'
 ###
 PUT /public-state/:id/stop controllers.api.game.PublicStateController.stop(id: java.util.UUID)
+
+
+POST /public-state/:id/invite controllers.api.game.PublicStateController.invite(id: java.util.UUID)
+
+
+POST /private-state controllers.api.game.PrivateStateController.create()
+
+
+POST /private-state/:id/invite controllers.api.game.PrivateStateController.invite(id: java.util.UUID)
+
+
+POST /private-state/:id/join controllers.api.game.PrivateStateController.join(id: java.util.UUID)

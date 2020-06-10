@@ -7,7 +7,7 @@ import commons.AppUtils
 import javax.inject.{Inject, Singleton}
 import org.postgresql.util.PSQLException
 import persistence.AppPostgresProfile.api._
-import persistence.model.{PrivateStateEntity, PrivateStateStatus, SocialOrder}
+import persistence.model.{PrivateStateEntity, PrivateStateStatus, PublicStateEntity, SocialOrder}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 
@@ -58,6 +58,11 @@ class PrivateStateDao @Inject()(protected val dbConfigProvider: DatabaseConfigPr
 
   def byIds(ids: Seq[UUID]): Future[Seq[PrivateStateEntity]] = {
     val action = PrivateStates.filter(_.id.inSet(ids)).result
+    db.run(action)
+  }
+
+  def byPublicState(publicState: PublicStateEntity): Future[Seq[PrivateStateEntity]] = {
+    val action = PrivateStates.filter(_.publicStateId === publicState.id.get).result
     db.run(action)
   }
 

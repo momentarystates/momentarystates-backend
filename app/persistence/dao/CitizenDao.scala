@@ -7,7 +7,7 @@ import commons.AppUtils
 import javax.inject.{Inject, Singleton}
 import org.postgresql.util.PSQLException
 import persistence.AppPostgresProfile.api._
-import persistence.model.{CitizenEntity, CitizenshipEndReason}
+import persistence.model.{CitizenEntity, CitizenshipEndReason, PrivateStateEntity, UserEntity}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 
@@ -23,7 +23,7 @@ class CitizenDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
     def name: Rep[String]                          = column[String]("name")
     def avatar: Rep[UUID]                          = column[UUID]("avatar")
     def startedAt: Rep[OffsetDateTime]             = column[OffsetDateTime]("started_at")
-    def endedAt: Rep[OffsetDateTime]               = column[OffsetDateTime]("ended_at")
+    def endedAt: Rep[Option[OffsetDateTime]]       = column[Option[OffsetDateTime]]("ended_at")
     def endReason: Rep[CitizenshipEndReason.Value] = column[CitizenshipEndReason.Value]("end_reason")
     def ts: Rep[OffsetDateTime]                    = column[OffsetDateTime]("ts")
     def lm: Rep[OffsetDateTime]                    = column[OffsetDateTime]("lm")
@@ -37,7 +37,7 @@ class CitizenDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
         name,
         avatar.?,
         startedAt,
-        endedAt.?,
+        endedAt,
         endReason.?,
         ts,
         lm,
@@ -54,6 +54,21 @@ class CitizenDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
 
   def byIds(ids: Seq[UUID]): Future[Seq[CitizenEntity]] = {
     val action = Citizens.filter(_.id.inSet(ids)).result
+    db.run(action)
+  }
+
+  def byUserAndPrivateState(user: UserEntity, privateState: PrivateStateEntity): Future[Option[CitizenEntity]] = {
+    val action = Citizens.filter(c => c.userId === user.id.get && c.privateStateId === privateState.id.get).result.headOption
+    db.run(action)
+  }
+
+  def byPrivateStates(privateStates: Seq[PrivateStateEntity]): Future[Seq[CitizenEntity]] = {
+    val action = Citizens.filter(_.privateStateId inSet privateStates.flatMap(_.id)).result
+    db.run(action)
+  }
+
+  def activeByPrivateStates(privatesStates: Seq[PrivateStateEntity]): Future[Seq[CitizenEntity]] = {
+    val action = Citizens.filter(c => c.privateStateId.inSet(privatesStates.flatMap(_.id)) && c.endedAt.isEmpty).result
     db.run(action)
   }
 

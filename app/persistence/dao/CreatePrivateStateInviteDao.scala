@@ -7,7 +7,7 @@ import commons.AppUtils
 import javax.inject.{Inject, Singleton}
 import org.postgresql.util.PSQLException
 import persistence.AppPostgresProfile.api._
-import persistence.model.CreatePrivateStateInviteEntity
+import persistence.model.{CreatePrivateStateInviteEntity, PublicStateEntity}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 
@@ -50,6 +50,14 @@ class CreatePrivateStateInviteDao @Inject()(protected val dbConfigProvider: Data
 
   def byIds(ids: Seq[UUID]): Future[Seq[CreatePrivateStateInviteEntity]] = {
     val action = CreatePrivateStateInvites.filter(_.id.inSet(ids)).result
+    db.run(action)
+  }
+
+  def byPublicState(publicState: PublicStateEntity, email: Option[String] = None): Future[Seq[CreatePrivateStateInviteEntity]] = {
+    val action = email match {
+      case Some(query) => CreatePrivateStateInvites.filter(i => (i.publicStateId === publicState.id.get) && (i.email like s"%$query%")).result
+      case _ => CreatePrivateStateInvites.filter(_.publicStateId === publicState.id.get).result
+    }
     db.run(action)
   }
 

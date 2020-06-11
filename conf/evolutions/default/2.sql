@@ -17,7 +17,7 @@ CREATE TABLE public_states
 (
     id                      UUID                    NOT NULL PRIMARY KEY,
     speculation_id          UUID                    NOT NULL REFERENCES "speculations",
-    name                    varchar(128)            NOT NULL UNIQUE,
+    name                    varchar(128)            NOT NULL,
     logo                    UUID,
     goddess_id              UUID                    NOT NULL REFERENCES "users",
     status                  public_state_status     NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE private_states
 (
     id                      UUID                    NOT NULL PRIMARY KEY,
     public_state_id         UUID                    NOT NULL REFERENCES "public_states",
-    name                    varchar(128)            NOT NULL UNIQUE,
+    name                    varchar(128)            NOT NULL,
     logo                    UUID,
     social_order            social_order            NOT NULL,
     created_by              UUID                    NOT NULL REFERENCES "users",
@@ -48,8 +48,11 @@ CREATE TABLE private_states
     characteristics         varchar ARRAY           NOT NULL,
     ts                      timestamptz             NOT NULL,
     lm                      timestamptz             NOT NULL,
-    v                       int                     NOT NULL
+    v                       int                     NOT NULL,
+    UNIQUE (public_state_id, name)
 );
+
+CREATE TYPE citizenship_end_reason AS ENUM ('Kicked', 'Ended');
 
 CREATE TABLE citizens
 (
@@ -59,6 +62,7 @@ CREATE TABLE citizens
     name                    varchar(128)            NOT NULL,
     started_at              timestamptz             NOT NULL,
     ended_at                timestamptz,
+    end_reason              citizenship_end_reason,
     ts                      timestamptz             NOT NULL,
     lm                      timestamptz             NOT NULL,
     v                       int                     NOT NULL
@@ -77,3 +81,4 @@ DROP TABLE private_states CASCADE;
 DROP TYPE social_order;
 DROP TYPE private_state_status;
 DROP TABLE citizens CASCADE;
+DROP TYPE citizenship_end_reason;

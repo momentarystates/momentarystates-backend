@@ -42,7 +42,7 @@ object AdminProtocol {
 
   case class CreateSpeculation(
       email: String,
-      token: Option[String]
+      token: Option[String] = None
   )
 
   object CreateSpeculation {

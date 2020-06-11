@@ -127,12 +127,53 @@ POST /public-state/:id/invite controllers.api.game.PublicStateController.invite(
 
 
 ###
+# summary: Search invites for creating a private state
+# description: |
+#   This endpoint returns all invites that have been created to create a new private state. Filter the result by
+#   specifying an email or a part of an email.
+# operationId: get-create-private-state-invites
+# parameters:
+#   - name: id
+#     in: path
+#     description: public state id
+#     required: true
+#   - name: email
+#     in: query
+#     required: false
+#     type: string
+# responses:
+#   200:
+#     description: Successful response with a list of invites.
+#     schema:
+#       $ref: '#/definitions/persistence.model.CreatePrivateStateInviteEntity'
+#   400:
+#     description: |
+#       In case something went wrong check the error code.
+#     schema:
+#       $ref: '#/definitions/commons.AppError'
+###
+GET /public-state/:id/invite/search controllers.api.game.PublicStateController.invites(id: java.util.UUID)
+
+
+###
 # summary: Create a new private state
 # description: |
 #   Creates a new private state. The requesting user automatically becomes a citizen of that private state. If the
 #   minimum number of citizen per private state, which is defined on public state level, is reached, the status of
 #   the private state will be `Founded`, otherwise it will be `Founding` which means, it is not yet "officially"
 #   operational at this point.
+#
+#   Characteristics is a list of strings and one of each of the following pairs. In a later version, these values
+#   will be definable via the goddess at the time a public state is created. For now, only the following pairs
+#   are available:
+#
+#   - `Innovative` vs `Traditional`
+#   - `Tolerant & open` vs `Cautious and Secretive`
+#   - `Chaotic` vs `Structured`
+#   - `Concurrence` vs `Collaboration`
+#   - `Spontaneous` vs `Planning`
+#
+#   At the moment the backend does not perform any validation of the values defined as `characteristics`.
 # operationId: create-private-state
 # parameters:
 #   - name: body

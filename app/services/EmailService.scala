@@ -54,7 +54,10 @@ class EmailService @Inject()(
         bodyHtml = Option(email.body)
       )
       try {
-        val messageId = if (to.isEmpty) "" else mailerClient.send(em)
+        val messageId = if (to.isEmpty) {
+          logger.info("`to` field is empty, no email is sent")
+          ""
+        } else mailerClient.send(em)
         setEmailSuccess(email, messageId)
       } catch {
         case ex: Exception =>

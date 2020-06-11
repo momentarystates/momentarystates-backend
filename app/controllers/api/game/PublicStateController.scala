@@ -9,6 +9,7 @@ import javax.inject.{Inject, Singleton}
 import persistence.dao.{CreatePrivateStateInviteDao, EmailDao, PublicStateDao, SpeculationDao}
 import persistence.model._
 import play.api.Configuration
+import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents, EssentialAction}
 import scalaz.Scalaz._
 import scalaz.{-\/, \/-}
@@ -65,7 +66,7 @@ class PublicStateController @Inject()(
     res.runResult()
   }
 
-  def stop(id: UUID): EssentialAction = actions.RunningPublicStateAction(id).async { implicit request =>
+  def stop(id: UUID): EssentialAction = actions.GoddessAction(id).async { implicit request =>
     publicStateDao
       .update(request.publicState.copy(status = PublicStateStatus.Finished))
       .toAppResult()
@@ -103,5 +104,11 @@ class PublicStateController @Inject()(
     } yield ""
 
     res.runResultEmptyOk()
+  }
+
+  def invites(id: UUID): EssentialAction = actions.GoddessAction(id).async { implicit request =>
+    createPrivateStateInviteDao.byPublicState(request.publicState, request.getQueryString("email")) map { invites =>
+      Ok(Json.toJson(invites))
+    }
   }
 }

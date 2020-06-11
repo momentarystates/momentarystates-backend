@@ -3,7 +3,7 @@ package controllers.api.game
 import java.util.UUID
 
 import commons._
-import controllers.api.game.GameProtocol.{CreatePrivateState, CreatedPrivateState, JoinPrivateState, PrivateStateInvite}
+import controllers.api.game.GameProtocol.{Citizenship, CreatePrivateState, JoinPrivateState, PrivateStateInvite}
 import controllers.{AppActions, AppErrors, ControllerHelper}
 import javax.inject.{Inject, Singleton}
 import persistence.dao._
@@ -56,13 +56,13 @@ class PrivateStateController @Inject()(
       }
     }
 
-    def handleSocialOrder(privateState: PrivateStateEntity, citizen: CitizenEntity) = {
-      if (privateState.socialOrder == SocialOrder.SinglePerson || privateState.socialOrder == SocialOrder.SinglePersonRotation) {
-        privateStateDao.update(privateState.copy(masterId = citizen.id)) map {
-          case Left(error)          => -\/(AppErrors.DatabaseError(error))
-          case Right(updatedEntity) => \/-(updatedEntity)
-        }
-      } else Future.successful(\/-(privateState))
+    def postProcessPrivateState(publicState: PublicStateEntity, privateState: PrivateStateEntity, citizen: CitizenEntity) = {
+      val masterId = if (privateState.socialOrder == SocialOrder.SinglePerson || privateState.socialOrder == SocialOrder.SinglePersonRotation) citizen.id else None
+      val status   = if (publicState.params.minCitizenPerState <= 1) PrivateStateStatus.Founded else PrivateStateStatus.Founding
+      privateStateDao.update(privateState.copy(masterId = masterId, status = status)) map {
+        case Left(error)          => -\/(AppErrors.DatabaseError(error))
+        case Right(updatedEntity) => \/-(updatedEntity)
+      }
     }
 
     val res = for {
@@ -72,8 +72,8 @@ class PrivateStateController @Inject()(
       _                   <- AppResult.fromFutureOptionError(validate(publicState))
       privateState        <- AppResult[PrivateStateEntity](createPrivateState(in, publicState))
       citizen             <- AppResult[CitizenEntity](createCitizenship(privateState, in))
-      updatedPrivateState <- AppResult[PrivateStateEntity](handleSocialOrder(privateState, citizen))
-    } yield CreatedPrivateState(updatedPrivateState, citizen)
+      updatedPrivateState <- AppResult[PrivateStateEntity](postProcessPrivateState(publicState, privateState, citizen))
+    } yield Citizenship(updatedPrivateState, citizen)
 
     res.runResult()
   }
@@ -130,9 +130,9 @@ class PrivateStateController @Inject()(
       } yield {
         val activeCitizenships       = citizenships.filter(_.endedAt.isEmpty)
         val privateStateCitizenships = activeCitizenships.filter(_.privateStateId == request.privateState.id.get)
-        if (activeCitizenships.exists(_.userId == request.auth.user.id.get)) Option(AppErrors.AlreadyActiveCitizenError)
-        else if (request.publicState.params.maxCitizenPerState > 0 && privateStateCitizenships.size >= request.publicState.params.maxCitizenPerState) Option(AppErrors.MaxCitizenPerPrivateStateError)
-        else None
+        if (activeCitizenships.exists(_.userId == request.auth.user.id.get)) -\/(AppErrors.AlreadyActiveCitizenError)
+        else if (request.publicState.params.maxCitizenPerState > 0 && privateStateCitizenships.size >= request.publicState.params.maxCitizenPerState) -\/(AppErrors.MaxCitizenPerPrivateStateError)
+        else \/-(activeCitizenships)
       }
     }
 
@@ -144,14 +144,24 @@ class PrivateStateController @Inject()(
       }
     }
 
+    def postProcessPrivateState(citizens: Seq[CitizenEntity]) = {
+      if (citizens.size >= request.publicState.params.minCitizenPerState) {
+        privateStateDao.update(request.privateState.copy(status = PrivateStateStatus.Founded)) map {
+          case Left(error)          => -\/(AppErrors.DatabaseError(error))
+          case Right(updatedEntity) => \/-(updatedEntity)
+        }
+      } else Future.successful(\/-(request.privateState))
+    }
+
     val res = for {
-      in          <- AppResult[JoinPrivateState](validateJson[JoinPrivateState](request))
-      _           <- AppResult.fromFutureOptionError(checkCitizenship())
-      invite      <- joinPrivateStateInviteDao.byToken(request.privateState, in.token).handleEntityNotFound("joinInvite")
-      _           <- AppResult(invite.usedAt.isEmpty)(AppErrors.JoinPrivateStateInviteAlreadyUsedError)
-      citizenship <- AppResult[CitizenEntity](createCitizenship(in))
-      _           <- joinPrivateStateInviteDao.update(invite.copy(usedBy = request.auth.user.id, usedAt = Option(AppUtils.now))).toAppResult()
-    } yield citizenship
+      in                  <- AppResult[JoinPrivateState](validateJson[JoinPrivateState](request))
+      activeCitizens      <- AppResult[Seq[CitizenEntity]](checkCitizenship())
+      invite              <- joinPrivateStateInviteDao.byToken(request.privateState, in.token).handleEntityNotFound("joinInvite")
+      _                   <- AppResult(invite.usedAt.isEmpty)(AppErrors.JoinPrivateStateInviteAlreadyUsedError)
+      citizen             <- AppResult[CitizenEntity](createCitizenship(in))
+      _                   <- joinPrivateStateInviteDao.update(invite.copy(usedBy = request.auth.user.id, usedAt = Option(AppUtils.now))).toAppResult()
+      updatedPrivateState <- AppResult[PrivateStateEntity](postProcessPrivateState(activeCitizens :+ citizen))
+    } yield Citizenship(updatedPrivateState, citizen)
 
     res.runResult()
   }

@@ -145,7 +145,7 @@ POST /public-state/:id/invite controllers.api.game.PublicStateController.invite(
 #   200:
 #     description: Successful response with the private state entity and the citizen entity.
 #     schema:
-#       $ref: '#/definitions/controllers.api.game.GameProtocol.CreatedPrivateState'
+#       $ref: '#/definitions/controllers.api.game.GameProtocol.Citizenship'
 #   400:
 #     description: |
 #       In case something went wrong check the error code.
@@ -199,6 +199,9 @@ POST /private-state/:id/invite controllers.api.game.PrivateStateController.invit
 # description: |
 #   Join a private state and become a citizen of the private state. The requesting user can be already an active
 #   citizen in this or any other private state of the public state. If this happens, an error is returned.
+#
+#   In case of a successful request, the response contains the updated private state and the citizen entity. Since
+#   the status of the private can change during this process, it is part of the response.
 # operationId: join-private-state
 # parameters:
 #   - name: id
@@ -213,9 +216,9 @@ POST /private-state/:id/invite controllers.api.game.PrivateStateController.invit
 #       $ref: '#/definitions/controllers.api.game.GameProtocol.JoinPrivateState'
 # responses:
 #   200:
-#     description: Successful response with a citizenship entity
+#     description: Successful response with the private state entity and the citizen entity.
 #     schema:
-#       $ref: '#/definitions/persistence.model.CitizenEntity'
+#       $ref: '#/definitions/controllers.api.game.GameProtocol.Citizenship'
 #   400:
 #     description: |
 #       In case something went wrong check the error code.

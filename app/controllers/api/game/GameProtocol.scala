@@ -56,4 +56,13 @@ object GameProtocol {
     implicit val jsonFormat: Format[CreatedPrivateState] = Json.format[CreatedPrivateState]
   }
 
+  case class JoinPrivateState(
+      token: String,
+      citizenName: Option[String]
+  )
+
+  object JoinPrivateState {
+    implicit val jsonFormat: Format[JoinPrivateState] = Json.format[JoinPrivateState]
+  }
+
 }

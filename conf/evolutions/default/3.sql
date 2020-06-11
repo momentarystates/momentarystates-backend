@@ -12,7 +12,8 @@ CREATE TABLE create_private_state_invites
     used_by                 UUID                REFERENCES "users",
     ts                      timestamptz         NOT NULL,
     lm                      timestamptz         NOT NULL,
-    v                       int                 NOT NULL
+    v                       int                 NOT NULL,
+    UNIQUE (public_state_id, token)
 );
 
 
@@ -26,7 +27,8 @@ CREATE TABLE join_private_state_invites
     used_by                 UUID                REFERENCES "users",
     ts                      timestamptz         NOT NULL,
     lm                      timestamptz         NOT NULL,
-    v                       int                 NOT NULL
+    v                       int                 NOT NULL,
+    UNIQUE (private_state_id, token)
 );
 
 

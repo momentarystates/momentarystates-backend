@@ -7,7 +7,7 @@ import commons.AppUtils
 import javax.inject.{Inject, Singleton}
 import org.postgresql.util.PSQLException
 import persistence.AppPostgresProfile.api._
-import persistence.model.JoinPrivateStateInviteEntity
+import persistence.model.{JoinPrivateStateInviteEntity, PrivateStateEntity}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 
@@ -50,6 +50,11 @@ class JoinPrivateStateInviteDao @Inject()(protected val dbConfigProvider: Databa
 
   def byIds(ids: Seq[UUID]): Future[Seq[JoinPrivateStateInviteEntity]] = {
     val action = JoinPrivateStateInvites.filter(_.id.inSet(ids)).result
+    db.run(action)
+  }
+
+  def byToken(privateState: PrivateStateEntity, token: String): Future[Option[JoinPrivateStateInviteEntity]] = {
+    val action = JoinPrivateStateInvites.filter(i => i.privateStateId === privateState.id.get && i.token === token).result.headOption
     db.run(action)
   }
 

@@ -3,7 +3,7 @@ package controllers.api.game
 import java.util.UUID
 
 import commons._
-import controllers.api.game.GameProtocol.{CreatePrivateState, CreatedPrivateState, PrivateStateInvite}
+import controllers.api.game.GameProtocol.{CreatePrivateState, CreatedPrivateState, JoinPrivateState, PrivateStateInvite}
 import controllers.{AppActions, AppErrors, ControllerHelper}
 import javax.inject.{Inject, Singleton}
 import persistence.dao._
@@ -123,6 +123,36 @@ class PrivateStateController @Inject()(
   }
 
   def join(id: UUID): EssentialAction = actions.PrivateStateAction(id).async(parse.json) { implicit request =>
-    Future.successful(NotImplemented)
+    def checkCitizenship() = {
+      for {
+        privateStates <- privateStateDao.byPublicState(request.publicState)
+        citizenships  <- citizenDao.activeByPrivateStates(privateStates)
+      } yield {
+        val activeCitizenships       = citizenships.filter(_.endedAt.isEmpty)
+        val privateStateCitizenships = activeCitizenships.filter(_.privateStateId == request.privateState.id.get)
+        if (activeCitizenships.exists(_.userId == request.auth.user.id.get)) Option(AppErrors.AlreadyActiveCitizenError)
+        else if (request.publicState.params.maxCitizenPerState > 0 && privateStateCitizenships.size >= request.publicState.params.maxCitizenPerState) Option(AppErrors.MaxCitizenPerPrivateStateError)
+        else None
+      }
+    }
+
+    def createCitizenship(in: JoinPrivateState) = {
+      val entity = CitizenEntity.generate(request.auth.user, request.privateState, in.citizenName)
+      citizenDao.insert(entity) map {
+        case Left(error) => -\/(AppErrors.DatabaseError(error))
+        case Right(uuid) => \/-(entity.copy(id = Option(uuid)))
+      }
+    }
+
+    val res = for {
+      in          <- AppResult[JoinPrivateState](validateJson[JoinPrivateState](request))
+      _           <- AppResult.fromFutureOptionError(checkCitizenship())
+      invite      <- joinPrivateStateInviteDao.byToken(request.privateState, in.token).handleEntityNotFound("joinInvite")
+      _           <- AppResult(invite.usedAt.isEmpty)(AppErrors.JoinPrivateStateInviteAlreadyUsedError)
+      citizenship <- AppResult[CitizenEntity](createCitizenship(in))
+      _           <- joinPrivateStateInviteDao.update(invite.copy(usedBy = request.auth.user.id, usedAt = Option(AppUtils.now))).toAppResult()
+    } yield citizenship
+
+    res.runResult()
   }
 }

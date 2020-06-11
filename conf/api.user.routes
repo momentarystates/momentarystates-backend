@@ -1,5 +1,44 @@
 
+
+###
+# summary: Get user data
+# description: |
+#   Get data of authenticated user
+# operationId: user-get-data
+# responses:
+#   200:
+#     description: successful response with user data
+#     schema:
+#       type: object
+#       $ref: '#/definitions/controllers.api.user.UserProtocol.UserData'
+#   401: If user is not authenticated
+###
+GET / controllers.api.user.UserController.getData
+
+
+
+###
+# summary: Upload user avatar
+# description: |
+#   Upload and set user avatar of authenticated user. Request expects one single image. The response is the updated
+#   user object which contains an id of the avatar binary.
+# operationId: user-set-avatar
+# responses:
+#   200:
+#     description: Image data if the user has an avatar specified
+#     schema:
+#       type: object
+#       $ref: '#/definitions/persistence.model.UserEntity'
+#   400:
+#     description: |
+#       bad request contains an error code and error message
+#     schema:
+#       type: object
+#       $ref: '#/definitions/commons.AppError'
+###
 POST /avatar controllers.api.user.UserAvatarController.setAvatar()
+
+
 
 ###
 # summary: Get user avatar

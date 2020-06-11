@@ -55,6 +55,11 @@ class CitizenDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
     db.run(action)
   }
 
+  def byUser(user: UserEntity): Future[Seq[CitizenEntity]] = {
+    val action = Citizens.filter(_.userId === user.id.get).result
+    db.run(action)
+  }
+
   def byUserAndPrivateState(user: UserEntity, privateState: PrivateStateEntity): Future[Option[CitizenEntity]] = {
     val action = Citizens.filter(c => c.userId === user.id.get && c.privateStateId === privateState.id.get).result.headOption
     db.run(action)

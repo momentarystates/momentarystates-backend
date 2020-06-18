@@ -3,7 +3,7 @@ package controllers.api.game
 import java.util.UUID
 
 import commons._
-import controllers.api.game.GameProtocol.{CreatePublicState, PrivateStateInvite}
+import controllers.api.game.GameProtocol.{CreatePublicState, PrivateStateInvite, UpdatePublicState}
 import controllers.{AppActions, AppErrors, ControllerHelper}
 import javax.inject.{Inject, Singleton}
 import persistence.dao.{CreatePrivateStateInviteDao, EmailDao, PublicStateDao, SpeculationDao}
@@ -76,7 +76,7 @@ class PublicStateController @Inject()(
   def invite(id: UUID): EssentialAction = actions.RunningPublicStateAction(id).async(parse.json) { implicit request =>
     val domain                                                    = config.get[String]("app.domain")
     val registerPath                                              = config.get[String]("app.ui.registerPath")
-    val createPrivateStatePath                                     = config.get[String]("app.ui.createPrivateStatePath")
+    val createPrivateStatePath                                    = config.get[String]("app.ui.createPrivateStatePath")
     val registerUrl                                               = domain + registerPath
     def createPrivateStateUrl(token: String, publicStateId: UUID) = domain + createPrivateStatePath.replace(":token", token).replace(":publicStateId", publicStateId.toString)
 
@@ -110,5 +110,13 @@ class PublicStateController @Inject()(
     createPrivateStateInviteDao.byPublicState(request.publicState, request.getQueryString("email")) map { invites =>
       Ok(Json.toJson(invites))
     }
+  }
+
+  def update(id: UUID): EssentialAction = actions.GoddessAction(id).async(parse.json) { implicit request =>
+    val res = for {
+      in                 <- AppResult[UpdatePublicState](validateJson[UpdatePublicState](request))
+      updatedPublicState <- publicStateDao.update(request.publicState.copy(marketUrl = in.marketUrl, params = in.params)).toAppResult()
+    } yield updatedPublicState
+    res.runResult()
   }
 }

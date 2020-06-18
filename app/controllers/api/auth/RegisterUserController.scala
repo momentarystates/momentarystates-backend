@@ -25,11 +25,11 @@ class RegisterUserController @Inject()(
     with ControllerHelper {
 
   def register(): EssentialAction = appActions.LoggingAction.async(parse.json) { implicit request =>
-    val domain       = config.get[String]("app.domain")
-    val confirmPath  = config.get[String]("app.ui.confirmEmailPath")
-    val confirmUrl   = domain + confirmPath
-    val registerPath = config.get[String]("app.ui.registerPath")
-    val registerUrl  = domain + registerPath
+    val domain                                  = config.get[String]("app.domain")
+    val confirmPath                             = config.get[String]("app.ui.confirmEmailPath")
+    def confirmUrl(email: String, code: String) = domain + confirmPath.replace(":email", email).replace(":code", code)
+    val registerPath                            = config.get[String]("app.ui.registerPath")
+    val registerUrl                             = domain + registerPath
 
     def registerUser(in: RegisterUser) = {
       val user = UserEntity.generate(in.username, in.password, in.email)
@@ -39,8 +39,8 @@ class RegisterUserController @Inject()(
       }
     }
 
-    def sendEmailConfirmation(user: UserEntity) = {
-      val template = EmailTemplate.getRegisterEmail(user.username, confirmUrl, registerUrl)
+    def sendEmailConfirmation(user: UserEntity, in: RegisterUser) = {
+      val template = EmailTemplate.getRegisterEmail(user.username, confirmUrl(user.email, user.confirmationCode), registerUrl)
       val email    = EmailEntity.generate(template.subject, Seq(user.email), template.body)
       emailDao.insert(email) map {
         case Left(error) => -\/(AppErrors.DatabaseError(error))
@@ -51,7 +51,7 @@ class RegisterUserController @Inject()(
     val res = for {
       in   <- AppResult[RegisterUser](validateJson[RegisterUser](request))
       user <- AppResult[UserEntity](registerUser(in))
-      _    <- AppResult[EmailEntity](sendEmailConfirmation(user))
+      _    <- AppResult[EmailEntity](sendEmailConfirmation(user, in))
     } yield user
 
     res.runResultEmptyOk()

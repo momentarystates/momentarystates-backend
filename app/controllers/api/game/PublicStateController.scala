@@ -3,10 +3,10 @@ package controllers.api.game
 import java.util.UUID
 
 import commons._
-import controllers.api.game.GameProtocol.{CreatePublicState, PrivateStateInvite, UpdatePublicState}
+import controllers.api.game.GameProtocol.{CreatePublicState, GoddessSpeculationData, PrivateStateInvite, UpdatePublicState}
 import controllers.{AppActions, AppErrors, ControllerHelper}
 import javax.inject.{Inject, Singleton}
-import persistence.dao.{CreatePrivateStateInviteDao, EmailDao, PublicStateDao, SpeculationDao}
+import persistence.dao._
 import persistence.model._
 import play.api.Configuration
 import play.api.libs.json.Json
@@ -22,11 +22,32 @@ class PublicStateController @Inject()(
     actions: AppActions,
     speculationDao: SpeculationDao,
     publicStateDao: PublicStateDao,
+    privateStateDao: PrivateStateDao,
+    citizenDao: CitizenDao,
     emailDao: EmailDao,
     createPrivateStateInviteDao: CreatePrivateStateInviteDao,
+    joinPrivateStateInviteDao: JoinPrivateStateInviteDao,
     config: Configuration
 ) extends AbstractController(cc)
     with ControllerHelper {
+
+  def get(id: UUID): EssentialAction = actions.GoddessAction(id).async { implicit request =>
+    for {
+      privateStates <- privateStateDao.byPublicState(request.publicState)
+      citizens <- citizenDao.byPrivateStates(privateStates)
+      createInvites <- createPrivateStateInviteDao.byPublicState(request.publicState)
+      joinInvites <- joinPrivateStateInviteDao.byPrivateStates(privateStates)
+    } yield {
+      val out = GoddessSpeculationData(
+        request.publicState,
+        privateStates,
+        citizens,
+        createInvites,
+        joinInvites
+      )
+      Ok(Json.toJson(out))
+    }
+  }
 
   def create(): EssentialAction = actions.AuthenticatedAction.async(parse.json) { implicit request =>
     def createPublicState(in: CreatePublicState, speculation: SpeculationEntity) = {
@@ -60,7 +81,7 @@ class PublicStateController @Inject()(
   def start(id: UUID): EssentialAction = actions.GoddessAction(id).async { implicit request =>
     val res = for {
       _                  <- AppResult(request.publicState.status == PublicStateStatus.Created)(AppErrors.InvalidPublicStateStatusError)
-      updatedPublicState <- publicStateDao.update(request.publicState.copy(status = PublicStateStatus.Running)).toAppResult()
+      updatedPublicState <- publicStateDao.update(request.publicState.copy(status = PublicStateStatus.Running, startedAt = Option(AppUtils.now))).toAppResult()
     } yield updatedPublicState
 
     res.runResult()
@@ -77,8 +98,8 @@ class PublicStateController @Inject()(
     val domain                                                    = config.get[String]("app.domain")
     val registerPath                                              = config.get[String]("app.ui.registerPath")
     val createPrivateStatePath                                    = config.get[String]("app.ui.createPrivateStatePath")
-    val registerUrl                                               = domain + registerPath
-    def createPrivateStateUrl(token: String, publicStateId: UUID) = domain + createPrivateStatePath.replace(":token", token).replace(":publicStateId", publicStateId.toString)
+    val registerUrl                                               = domain + "://" + registerPath
+    def createPrivateStateUrl(token: String, publicStateId: UUID) = domain + "://" + createPrivateStatePath.replace(":token", token).replace(":publicStateId", publicStateId.toString)
 
     def createInvite(in: PrivateStateInvite, publicState: PublicStateEntity) = {
       val entity = CreatePrivateStateInviteEntity.generate(publicState.id.get, in.email)
@@ -89,7 +110,7 @@ class PublicStateController @Inject()(
     }
 
     def sendEmail(invite: CreatePrivateStateInviteEntity, publicState: PublicStateEntity) = {
-      val template = EmailTemplate.getCreatePrivateStateInviteEmailTemplate(request.auth.user.username, createPrivateStateUrl(invite.token, publicState.id.get), registerUrl)
+      val template = EmailTemplate.getCreatePrivateStateInviteEmailTemplate(request.auth.user.username, publicState.name, createPrivateStateUrl(invite.token, publicState.id.get), registerUrl)
       val email    = EmailEntity.generate(template.subject, Seq(invite.email), template.body)
       emailDao.insert(email) map {
         case Left(error) => Option(AppErrors.DatabaseError(error))

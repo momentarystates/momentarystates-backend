@@ -1,7 +1,5 @@
 package controllers.api.auth
 
-import java.util.UUID
-
 import commons.{AppResult, EmailTemplate}
 import controllers.AppErrors.DatabaseError
 import controllers.api.ApiProtocol.RegisterUser
@@ -15,7 +13,6 @@ import scalaz.Scalaz._
 import scalaz.{-\/, \/-}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 @Singleton
 class RegisterUserController @Inject()(
@@ -28,10 +25,9 @@ class RegisterUserController @Inject()(
     with ControllerHelper {
 
   def register(): EssentialAction = appActions.LoggingAction.async(parse.json) { implicit request =>
-
-    val domain                                                   = config.get[String]("app.domain")
-    val registerPath                                             = config.get[String]("app.ui.registerPath")
-    val registerUrl                                              = domain + "://" + registerPath
+    val domain       = config.get[String]("app.domain")
+    val registerPath = config.get[String]("app.ui.registerPath")
+    val registerUrl  = domain + registerPath
 
     def registerUser(in: RegisterUser) = {
       val user = UserEntity.generate(in.username, in.password, in.email)
@@ -43,7 +39,7 @@ class RegisterUserController @Inject()(
 
     def sendEmailConfirmation(user: UserEntity) = {
       val template = EmailTemplate.getRegisterEmail(user.username, registerUrl)
-      val email = EmailEntity.generate(template.subject, Seq(user.email), template.body)
+      val email    = EmailEntity.generate(template.subject, Seq(user.email), template.body)
       emailDao.insert(email) map {
         case Left(error) => -\/(AppErrors.DatabaseError(error))
         case Right(uuid) => \/-(email.copy(id = Option(uuid)))

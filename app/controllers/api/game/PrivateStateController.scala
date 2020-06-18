@@ -94,8 +94,8 @@ class PrivateStateController @Inject()(
     val domain                                                   = config.get[String]("app.domain")
     val registerPath                                             = config.get[String]("app.ui.registerPath")
     val joinPrivateStatePath                                     = config.get[String]("app.ui.joinPrivateStatePath")
-    val registerUrl                                              = domain + "://" + registerPath
-    def joinPrivateStateUrl(token: String, privateStateId: UUID) = domain + "://" + joinPrivateStatePath.replace(":token", token).replace(":privateStateId", privateStateId.toString)
+    val registerUrl                                              = domain + registerPath
+    def joinPrivateStateUrl(token: String, privateStateId: UUID) = domain + joinPrivateStatePath.replace(":token", token).replace(":privateStateId", privateStateId.toString)
 
     def validateSocialOrder() = {
       request.privateState.socialOrder match {

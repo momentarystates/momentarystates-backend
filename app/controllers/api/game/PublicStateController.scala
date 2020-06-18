@@ -98,8 +98,8 @@ class PublicStateController @Inject()(
     val domain                                                    = config.get[String]("app.domain")
     val registerPath                                              = config.get[String]("app.ui.registerPath")
     val createPrivateStatePath                                    = config.get[String]("app.ui.createPrivateStatePath")
-    val registerUrl                                               = domain + "://" + registerPath
-    def createPrivateStateUrl(token: String, publicStateId: UUID) = domain + "://" + createPrivateStatePath.replace(":token", token).replace(":publicStateId", publicStateId.toString)
+    val registerUrl                                               = domain + registerPath
+    def createPrivateStateUrl(token: String, publicStateId: UUID) = domain + createPrivateStatePath.replace(":token", token).replace(":publicStateId", publicStateId.toString)
 
     def createInvite(in: PrivateStateInvite, publicState: PublicStateEntity) = {
       val entity = CreatePrivateStateInviteEntity.generate(publicState.id.get, in.email)

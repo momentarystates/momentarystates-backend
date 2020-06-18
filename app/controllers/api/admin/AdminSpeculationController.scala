@@ -30,7 +30,7 @@ class AdminSpeculationController @Inject()(
     val registerPath                                             = config.get[String]("app.ui.registerPath")
     val createPublicStatePath                                    = config.get[String]("app.ui.createPublicStatePath")
     val registerUrl                                              = domain + registerPath
-    def createPublicStateUrl(token: String, speculationId: UUID) = domain + createPublicStatePath.replace(":token", token).replace(":speculationId", speculationId.toString)
+    def createPublicStateUrl(token: String, speculationId: UUID) = domain + "://" + createPublicStatePath.replace(":token", token).replace(":speculationId", speculationId.toString)
 
     def createSpeculation(in: CreateSpeculation) = {
       val speculation = SpeculationEntity.generate(in.email, in.token)

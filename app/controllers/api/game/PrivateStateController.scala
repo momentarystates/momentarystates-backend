@@ -82,8 +82,8 @@ class PrivateStateController @Inject()(
     val domain                                                   = config.get[String]("app.domain")
     val registerPath                                             = config.get[String]("app.ui.registerPath")
     val joinPrivateStatePath                                     = config.get[String]("app.ui.joinPrivateStatePath")
-    val registerUrl                                              = domain + registerPath
-    def joinPrivateStateUrl(token: String, privateStateId: UUID) = domain + joinPrivateStatePath.replace(":token", token).replace(":privateStateId", privateStateId.toString)
+    val registerUrl                                              = domain + "://" + registerPath
+    def joinPrivateStateUrl(token: String, privateStateId: UUID) = domain + "://" + joinPrivateStatePath.replace(":token", token).replace(":privateStateId", privateStateId.toString)
 
     def validateSocialOrder() = {
       request.privateState.socialOrder match {
@@ -103,8 +103,8 @@ class PrivateStateController @Inject()(
       }
     }
 
-    def sendEmail(invite: JoinPrivateStateInviteEntity, privateState: PublicStateEntity) = {
-      val template = EmailTemplate.getCreatePrivateStateInviteEmailTemplate(request.auth.user.username, joinPrivateStateUrl(invite.token, privateState.id.get), registerUrl)
+    def sendEmail(invite: JoinPrivateStateInviteEntity, privateState: PublicStateEntity, publicState: PublicStateEntity) = {
+      val template = EmailTemplate.getJoinPrivateStateInviteEmailTemplate(request.auth.user.username, publicState.name, joinPrivateStateUrl(invite.token, privateState.id.get), registerUrl)
       val email    = EmailEntity.generate(template.subject, Seq(invite.email), template.body)
       emailDao.insert(email) map {
         case Left(error) => Option(AppErrors.DatabaseError(error))
@@ -116,7 +116,7 @@ class PrivateStateController @Inject()(
       in     <- AppResult[PrivateStateInvite](validateJson[PrivateStateInvite](request))
       _      <- AppResult.fromOptionError(validateSocialOrder())
       invite <- AppResult[JoinPrivateStateInviteEntity](createInvite(in, request.publicState))
-      _      <- AppResult.fromFutureOptionError(sendEmail(invite, request.publicState))
+      _      <- AppResult.fromFutureOptionError(sendEmail(invite, request.publicState, request.publicState))
     } yield ""
 
     res.runResultEmptyOk()

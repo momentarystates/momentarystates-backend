@@ -1,12 +1,15 @@
 package controllers.api.auth
 
-import commons.AppResult
+import java.util.UUID
+
+import commons.{AppResult, EmailTemplate}
 import controllers.AppErrors.DatabaseError
 import controllers.api.ApiProtocol.RegisterUser
 import controllers.{AppActions, AppErrors, ControllerHelper}
 import javax.inject.{Inject, Singleton}
 import persistence.dao.{EmailDao, UserDao}
 import persistence.model.{EmailEntity, UserEntity}
+import play.api.Configuration
 import play.api.mvc.{AbstractController, ControllerComponents, EssentialAction}
 import scalaz.Scalaz._
 import scalaz.{-\/, \/-}
@@ -19,11 +22,17 @@ class RegisterUserController @Inject()(
     cc: ControllerComponents,
     appActions: AppActions,
     userDao: UserDao,
-    emailDao: EmailDao
+    emailDao: EmailDao,
+    config: Configuration
 ) extends AbstractController(cc)
     with ControllerHelper {
 
   def register(): EssentialAction = appActions.LoggingAction.async(parse.json) { implicit request =>
+
+    val domain                                                   = config.get[String]("app.domain")
+    val registerPath                                             = config.get[String]("app.ui.registerPath")
+    val registerUrl                                              = domain + "://" + registerPath
+
     def registerUser(in: RegisterUser) = {
       val user = UserEntity.generate(in.username, in.password, in.email)
       userDao.insert(user) map {
@@ -33,16 +42,8 @@ class RegisterUserController @Inject()(
     }
 
     def sendEmailConfirmation(user: UserEntity) = {
-      val subject = "DGDG - user registration"
-      val body =
-        s"""
-          |Hi ${user.username},
-          |<p>You have just registered. Please confirm your email address.</p>
-          |<p>Your code is: ${user.confirmationCode}</p>
-          |<p>have fun ;-)</p>
-          |<p>your dgdg admin</p>
-          |""".stripMargin
-      val email = EmailEntity.generate(subject, Seq(user.email), body)
+      val template = EmailTemplate.getRegisterEmail(user.username, registerUrl)
+      val email = EmailEntity.generate(template.subject, Seq(user.email), template.body)
       emailDao.insert(email) map {
         case Left(error) => -\/(AppErrors.DatabaseError(error))
         case Right(uuid) => \/-(email.copy(id = Option(uuid)))

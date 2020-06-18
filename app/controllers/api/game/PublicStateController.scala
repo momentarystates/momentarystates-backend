@@ -77,8 +77,8 @@ class PublicStateController @Inject()(
     val domain                                                    = config.get[String]("app.domain")
     val registerPath                                              = config.get[String]("app.ui.registerPath")
     val createPrivateStatePath                                    = config.get[String]("app.ui.createPrivateStatePath")
-    val registerUrl                                               = domain + registerPath
-    def createPrivateStateUrl(token: String, publicStateId: UUID) = domain + createPrivateStatePath.replace(":token", token).replace(":publicStateId", publicStateId.toString)
+    val registerUrl                                               = domain + "://" + registerPath
+    def createPrivateStateUrl(token: String, publicStateId: UUID) = domain + "://" + createPrivateStatePath.replace(":token", token).replace(":publicStateId", publicStateId.toString)
 
     def createInvite(in: PrivateStateInvite, publicState: PublicStateEntity) = {
       val entity = CreatePrivateStateInviteEntity.generate(publicState.id.get, in.email)
@@ -89,7 +89,7 @@ class PublicStateController @Inject()(
     }
 
     def sendEmail(invite: CreatePrivateStateInviteEntity, publicState: PublicStateEntity) = {
-      val template = EmailTemplate.getCreatePrivateStateInviteEmailTemplate(request.auth.user.username, createPrivateStateUrl(invite.token, publicState.id.get), registerUrl)
+      val template = EmailTemplate.getCreatePrivateStateInviteEmailTemplate(request.auth.user.username, publicState.name, createPrivateStateUrl(invite.token, publicState.id.get), registerUrl)
       val email    = EmailEntity.generate(template.subject, Seq(invite.email), template.body)
       emailDao.insert(email) map {
         case Left(error) => Option(AppErrors.DatabaseError(error))

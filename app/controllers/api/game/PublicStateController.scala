@@ -3,10 +3,10 @@ package controllers.api.game
 import java.util.UUID
 
 import commons._
-import controllers.api.game.GameProtocol.{CreatePublicState, PrivateStateInvite, UpdatePublicState}
+import controllers.api.game.GameProtocol.{CreatePublicState, GoddessSpeculationData, PrivateStateInvite, UpdatePublicState}
 import controllers.{AppActions, AppErrors, ControllerHelper}
 import javax.inject.{Inject, Singleton}
-import persistence.dao.{CreatePrivateStateInviteDao, EmailDao, PublicStateDao, SpeculationDao}
+import persistence.dao._
 import persistence.model._
 import play.api.Configuration
 import play.api.libs.json.Json
@@ -22,11 +22,32 @@ class PublicStateController @Inject()(
     actions: AppActions,
     speculationDao: SpeculationDao,
     publicStateDao: PublicStateDao,
+    privateStateDao: PrivateStateDao,
+    citizenDao: CitizenDao,
     emailDao: EmailDao,
     createPrivateStateInviteDao: CreatePrivateStateInviteDao,
+    joinPrivateStateInviteDao: JoinPrivateStateInviteDao,
     config: Configuration
 ) extends AbstractController(cc)
     with ControllerHelper {
+
+  def get(id: UUID): EssentialAction = actions.GoddessAction(id).async { implicit request =>
+    for {
+      privateStates <- privateStateDao.byPublicState(request.publicState)
+      citizens <- citizenDao.byPrivateStates(privateStates)
+      createInvites <- createPrivateStateInviteDao.byPublicState(request.publicState)
+      joinInvites <- joinPrivateStateInviteDao.byPrivateStates(privateStates)
+    } yield {
+      val out = GoddessSpeculationData(
+        request.publicState,
+        privateStates,
+        citizens,
+        createInvites,
+        joinInvites
+      )
+      Ok(Json.toJson(out))
+    }
+  }
 
   def create(): EssentialAction = actions.AuthenticatedAction.async(parse.json) { implicit request =>
     def createPublicState(in: CreatePublicState, speculation: SpeculationEntity) = {

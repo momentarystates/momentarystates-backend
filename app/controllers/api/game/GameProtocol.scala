@@ -2,7 +2,7 @@ package controllers.api.game
 
 import java.util.UUID
 
-import persistence.model.{CitizenEntity, PrivateStateEntity, PublicStateParams, SocialOrder}
+import persistence.model.{CitizenEntity, CreatePrivateStateInviteEntity, JoinPrivateStateInviteEntity, PrivateStateEntity, PublicStateEntity, PublicStateParams, SocialOrder}
 import play.api.libs.json.{Format, Json}
 
 object GameProtocol {
@@ -72,6 +72,18 @@ object GameProtocol {
 
   object UpdatePublicState {
     implicit val jsonFormat: Format[UpdatePublicState] = Json.format[UpdatePublicState]
+  }
+
+  case class GoddessSpeculationData(
+      publicState: PublicStateEntity,
+      privateStates: Seq[PrivateStateEntity],
+      citizens: Seq[CitizenEntity],
+      createInvites: Seq[CreatePrivateStateInviteEntity],
+      joinInvites: Seq[JoinPrivateStateInviteEntity]
+  )
+
+  object GoddessSpeculationData {
+    implicit val jsonFormat: Format[GoddessSpeculationData] = Json.format[GoddessSpeculationData]
   }
 
 }

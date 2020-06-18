@@ -1,3 +1,27 @@
+###
+# summary: Get goddess speculation data
+# description: |
+#   Get all data that belong to a speculation that are relevant for a goddess.
+# operationId: get-goddess-speculation-data
+# parameters:
+#   - name: id
+#     in: path
+#     required: true
+#     type: java.util.UUID
+# responses:
+#   200:
+#     description: Successful response with a public state entity.
+#     schema:
+#       type: object
+#       $ref: '#/definitions/controllers.api.game.GameProtocol.GoddessSpeculationData'
+#   400:
+#     description: |
+#       In case something went wrong check the error code.
+#     schema:
+#       $ref: '#/definitions/commons.AppError'
+###
+POST /public-state/:id controllers.api.game.PublicStateController.get(id: java.util.UUID)
+
 
 
 ###

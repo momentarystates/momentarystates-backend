@@ -53,6 +53,11 @@ class JoinPrivateStateInviteDao @Inject()(protected val dbConfigProvider: Databa
     db.run(action)
   }
 
+  def byPrivateStates(privateStates: Seq[PrivateStateEntity]): Future[Seq[JoinPrivateStateInviteEntity]] = {
+    val action = JoinPrivateStateInvites.filter(_.id.inSet(privateStates.flatMap(_.id))).result
+    db.run(action)
+  }
+
   def byToken(privateState: PrivateStateEntity, token: String): Future[Option[JoinPrivateStateInviteEntity]] = {
     val action = JoinPrivateStateInvites.filter(i => i.privateStateId === privateState.id.get && i.token === token).result.headOption
     db.run(action)

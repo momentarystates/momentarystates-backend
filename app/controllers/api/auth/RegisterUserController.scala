@@ -26,6 +26,8 @@ class RegisterUserController @Inject()(
 
   def register(): EssentialAction = appActions.LoggingAction.async(parse.json) { implicit request =>
     val domain       = config.get[String]("app.domain")
+    val confirmPath  = config.get[String]("app.ui.confirmEmailPath")
+    val confirmUrl   = domain + confirmPath
     val registerPath = config.get[String]("app.ui.registerPath")
     val registerUrl  = domain + registerPath
 
@@ -38,7 +40,7 @@ class RegisterUserController @Inject()(
     }
 
     def sendEmailConfirmation(user: UserEntity) = {
-      val template = EmailTemplate.getRegisterEmail(user.username, registerUrl)
+      val template = EmailTemplate.getRegisterEmail(user.username, confirmUrl, registerUrl)
       val email    = EmailEntity.generate(template.subject, Seq(user.email), template.body)
       emailDao.insert(email) map {
         case Left(error) => -\/(AppErrors.DatabaseError(error))

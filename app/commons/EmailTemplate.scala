@@ -4,7 +4,7 @@ case class EmailTemplate(subject: String, body: String)
 
 object EmailTemplate {
 
-  def getRegisterEmail(username: String, confirmUrl: String): EmailTemplate = {
+  def getRegisterEmail(username: String, confirmUrl: String, registerUrl: String): EmailTemplate = {
     val body =
       s"""
         |<p>Hello $username</p>

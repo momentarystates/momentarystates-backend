@@ -3,12 +3,13 @@ package controllers.api.game
 import java.util.UUID
 
 import commons._
-import controllers.api.game.GameProtocol.{Citizenship, CreatePrivateState, JoinPrivateState, PrivateStateInvite}
+import controllers.api.game.GameProtocol._
 import controllers.{AppActions, AppErrors, ControllerHelper}
 import javax.inject.{Inject, Singleton}
 import persistence.dao._
 import persistence.model._
 import play.api.Configuration
+import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents, EssentialAction}
 import scalaz.Scalaz._
 import scalaz.{-\/, \/-}
@@ -28,6 +29,17 @@ class PrivateStateController @Inject()(
     joinPrivateStateInviteDao: JoinPrivateStateInviteDao
 ) extends AbstractController(cc)
     with ControllerHelper {
+
+  def get(id: UUID): EssentialAction = actions.CitizenAction(id).async { implicit request =>
+    citizenDao.byPrivateStates(Seq(request.privateState)) map { citizens =>
+      val out = CitizenData(
+        request.privateState,
+        request.publicState,
+        citizens
+      )
+      Ok(Json.toJson(out))
+    }
+  }
 
   def create(): EssentialAction = actions.AuthenticatedAction.async(parse.json) { implicit request =>
     def validate(publicState: PublicStateEntity): Future[Option[AppError]] = {

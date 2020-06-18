@@ -10,7 +10,7 @@
 #     type: java.util.UUID
 # responses:
 #   200:
-#     description: Successful response with a public state entity.
+#     description: Successful response.
 #     schema:
 #       type: object
 #       $ref: '#/definitions/controllers.api.game.GameProtocol.GoddessSpeculationData'
@@ -20,7 +20,7 @@
 #     schema:
 #       $ref: '#/definitions/commons.AppError'
 ###
-POST /public-state/:id controllers.api.game.PublicStateController.get(id: java.util.UUID)
+GET /public-state/:id controllers.api.game.PublicStateController.get(id: java.util.UUID)
 
 
 
@@ -213,6 +213,33 @@ POST /public-state/:id/invite controllers.api.game.PublicStateController.invite(
 #       $ref: '#/definitions/commons.AppError'
 ###
 GET /public-state/:id/invite/search controllers.api.game.PublicStateController.invites(id: java.util.UUID)
+
+
+
+###
+# summary: Get citizen data
+# description: |
+#   Get all data that are relevant for a citizen
+# operationId: get-citizen-data
+# parameters:
+#   - name: id
+#     in: path
+#     required: true
+#     type: java.util.UUID
+# responses:
+#   200:
+#     description: Successful response.
+#     schema:
+#       type: object
+#       $ref: '#/definitions/controllers.api.game.GameProtocol.CitizenData'
+#   400:
+#     description: |
+#       In case something went wrong check the error code.
+#     schema:
+#       $ref: '#/definitions/commons.AppError'
+###
+GET /private-state/:id controllers.api.game.PrivateStateController.get(id: java.util.UUID)
+
 
 
 ###

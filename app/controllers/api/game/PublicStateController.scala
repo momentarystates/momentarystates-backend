@@ -81,7 +81,7 @@ class PublicStateController @Inject()(
   def start(id: UUID): EssentialAction = actions.GoddessAction(id).async { implicit request =>
     val res = for {
       _                  <- AppResult(request.publicState.status == PublicStateStatus.Created)(AppErrors.InvalidPublicStateStatusError)
-      updatedPublicState <- publicStateDao.update(request.publicState.copy(status = PublicStateStatus.Running)).toAppResult()
+      updatedPublicState <- publicStateDao.update(request.publicState.copy(status = PublicStateStatus.Running, startedAt = Option(AppUtils.now))).toAppResult()
     } yield updatedPublicState
 
     res.runResult()

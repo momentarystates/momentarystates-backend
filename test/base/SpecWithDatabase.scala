@@ -15,7 +15,7 @@ import scala.util.Random
 
 abstract class SpecWithDatabase extends PlaySpec with GuiceOneAppPerTest with Injecting with BeforeAndAfterAll with ScalaFutures {
 
-  private val postgres = new EmbeddedPostgres(Version.V10_3)
+  private val postgres = new EmbeddedPostgres(Version.V11_1)
 
   override protected def beforeAll(): Unit = {
     postgres.start("localhost", 15432, "postgres", "postgres", "postgres")

@@ -2,7 +2,7 @@ package controllers.api.game
 
 import java.util.UUID
 
-import persistence.model.{CitizenEntity, PrivateStateEntity, SocialOrder}
+import persistence.model.{CitizenEntity, PrivateStateEntity, PublicStateParams, SocialOrder}
 import play.api.libs.json.{Format, Json}
 
 object GameProtocol {
@@ -63,6 +63,15 @@ object GameProtocol {
 
   object JoinPrivateState {
     implicit val jsonFormat: Format[JoinPrivateState] = Json.format[JoinPrivateState]
+  }
+
+  case class UpdatePublicState(
+      marketUrl: Option[String],
+      params: PublicStateParams,
+  )
+
+  object UpdatePublicState {
+    implicit val jsonFormat: Format[UpdatePublicState] = Json.format[UpdatePublicState]
   }
 
 }

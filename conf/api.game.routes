@@ -32,6 +32,40 @@
 POST /public-state controllers.api.game.PublicStateController.create()
 
 
+
+###
+# summary: Update a public state
+# description: |
+#   Updates a public state. This endpoint can only be called by the goddess of the public state.
+#   It is possible to update parameter of the public state and the market url.
+# operationId: goddess-update-public-state
+# parameters:
+#   - name: id
+#     in: path
+#     required: true
+#     type: java.util.UUID
+#   - name: body
+#     in: body
+#     required: true
+#     schema:
+#       type: object
+#       $ref: '#/definitions/controllers.api.game.GameProtocol.UpdatePublicState'
+# responses:
+#   200:
+#     description: Successful response with a public state entity.
+#     schema:
+#       type: object
+#       $ref: '#/definitions/persistence.model.PublicStateEntity'
+#   400:
+#     description: |
+#       In case something went wrong check the error code.
+#     schema:
+#       $ref: '#/definitions/commons.AppError'
+###
+PUT /public-state/:id controllers.api.game.PublicStateController.update(id: java.util.UUID)
+
+
+
 ###
 # summary: Start the game for a public state
 # description: |
@@ -46,7 +80,7 @@ POST /public-state controllers.api.game.PublicStateController.create()
 #     in: path
 #     description: the id of the public state
 #     required: true
-#     type: uuid
+#     type: java.util.UUID
 # responses:
 #   200:
 #     description: Successful response with the updated public state entity.
@@ -77,7 +111,7 @@ PUT /public-state/:id/start controllers.api.game.PublicStateController.start(id:
 #     in: path
 #     description: the id of the public state
 #     required: true
-#     type: uuid
+#     type: java.util.UUID
 # responses:
 #   200:
 #     description: Successful response with the updated public state entity.
@@ -108,6 +142,7 @@ PUT /public-state/:id/stop controllers.api.game.PublicStateController.stop(id: j
 #     in: path
 #     description: public state id
 #     required: true
+#     type: java.util.UUID
 #   - name: body
 #     in: body
 #     required: true
@@ -137,6 +172,7 @@ POST /public-state/:id/invite controllers.api.game.PublicStateController.invite(
 #     in: path
 #     description: public state id
 #     required: true
+#     type: java.util.UUID
 #   - name: email
 #     in: query
 #     required: false
@@ -249,6 +285,7 @@ POST /private-state/:id/invite controllers.api.game.PrivateStateController.invit
 #     in: path
 #     description: private state id
 #     required: true
+#     type: java.util.UUID
 #   - name: body
 #     in: body
 #     required: true

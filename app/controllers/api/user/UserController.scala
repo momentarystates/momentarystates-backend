@@ -5,6 +5,7 @@ import controllers.api.user.UserProtocol.UserData
 import controllers.{AppActions, ControllerHelper}
 import javax.inject.{Inject, Singleton}
 import persistence.dao.{CitizenDao, PrivateStateDao, PublicStateDao}
+import persistence.model.PublicStateStatus
 import play.api.mvc.{AbstractController, ControllerComponents, EssentialAction}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -23,9 +24,12 @@ class UserController @Inject()(
     val data = for {
       citizens      <- citizenDao.byUser(request.auth.user)
       privateStates <- privateStateDao.byIds(citizens.map(_.privateStateId).distinct)
-      publicStates  <- publicStateDao.byIds(privateStates.map(_.publicStateId).distinct)
-      goddessStates <- publicStateDao.byGoddess(request.auth.user)
-    } yield UserData(citizens, privateStates, (publicStates ++ goddessStates).distinct)
+      publicStates  <- publicStateDao.byIds(privateStates.map(_.publicStateId).distinct, PublicStateStatus.Running)
+      goddessStates <- publicStateDao.byGoddess(request.auth.user, Seq(PublicStateStatus.Created, PublicStateStatus.Running))
+    } yield {
+      val filteredPrivateStates = privateStates.filter(p => publicStates.exists(_.id.get == p.publicStateId))
+      UserData(citizens, filteredPrivateStates, (publicStates ++ goddessStates).distinct)
+    }
 
     val res = AppResult.fromFuture[UserData](data)
 

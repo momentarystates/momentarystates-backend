@@ -61,8 +61,18 @@ class PublicStateDao @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     db.run(action)
   }
 
+  def byIds(ids: Seq[UUID], status: PublicStateStatus.Value): Future[Seq[PublicStateEntity]] = {
+    val action = PublicStates.filter(p => (p.id.inSet(ids)) && (p.status === status)).result
+    db.run(action)
+  }
+
   def byGoddess(user: UserEntity): Future[Seq[PublicStateEntity]] = {
     val action = PublicStates.filter(_.goddessId === user.id.get).result
+    db.run(action)
+  }
+
+  def byGoddess(user: UserEntity, status: Seq[PublicStateStatus.Value]): Future[Seq[PublicStateEntity]] = {
+    val action = PublicStates.filter(p => (p.goddessId === user.id.get) && (p.status inSet status)).result
     db.run(action)
   }
 
